@@ -25,6 +25,7 @@
     <ClCompile Include="src\Z80.c" />
     <ClCompile Include="src\Z80Alu.c" />
     <ClCompile Include="src\Z80Decompile.c" />
+    <ClCompile Include="src\Z80Instructions.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Debug.h" />
@@ -35,6 +36,7 @@
     <ClInclude Include="src\Z80Decompile.h" />
     <ClInclude Include="src\Z80FlagAccess.h" />
     <ClInclude Include="src\Z80InstrTypes.h" />
+    <ClInclude Include="src\Z80Instructions.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

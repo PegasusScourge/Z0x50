@@ -21,6 +21,7 @@ Can be run as a Sinclair ZX Spectrum or used as a basis for a larger project.
 #include "Z0x50.h"
 #include "Debug.h"
 #include "Signals.h"
+#include "Z80.h"
 
 #define MATCHARG(a, b) strcmp(argV[a], b) == 0
 
@@ -40,9 +41,23 @@ int argC;
 /* MAIN FUNCTION */
 
 void Z0_main() {
+    bool clkV = false;
+
     switch (Z0_state) {
     case Z0State_DECOMPILE: // Our task is to initialise the Z80 and the memory, then load the program we are to decompile. Then raise DECOMPILE_SIGNAL
 
+        break;
+
+    case Z0State_TEST:
+        // Rotate the clock signal 20 times
+        for (int i = 0; i < 20; i++) {
+            clkV = !clkV;
+            // printf("Clock now %i, iteration %i\n", clkV, i);
+            if (clkV)
+                signals_raiseSignal(&signal_CLCK);
+            else
+                signals_dropSignal(&signal_CLCK);
+        }
         break;
 
     default: // If we enter an unknown state, just terminate the program
@@ -53,6 +68,12 @@ void Z0_main() {
 }
 
 /* Functions */
+
+// Initialisation of the system from the arguments and CFG
+void Z0_initSystem() {
+    // For now, just init the Z80
+    Z80_init();
+}
 
 // Argument parsing function. Modifies var Z0_State
 void Z0_parseArguments() {
@@ -65,6 +86,11 @@ void Z0_parseArguments() {
             DEBUG_printf("Set state: DECOMPILE\n");
             // Set the state
             Z0_state = Z0State_DECOMPILE;
+        }
+        if (MATCHARG(i, "-T")) { // Test mode switch
+            DEBUG_printf("Set state: TEST\n");
+            // Set the state
+            Z0_state = Z0State_TEST;
         }
         if (MATCHARG(i, "-c") && i < (argC - 1)){ // CFG select switch, only triggers if there is at least one more argument
             // Set the CFG
@@ -97,6 +123,9 @@ int main(int argc, char* argv[]) {
 
     // TODO - parse the CFG file
     printf("Parsing CFG: TODO\n");
+
+    printf("Initialising system\n");
+    Z0_initSystem();
 
     printf("Launching\n");
     // Call the main function

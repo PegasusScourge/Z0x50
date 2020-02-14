@@ -18,6 +18,7 @@ Z80.h : Z80 CPU component
 */
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /* 16bit register definition */
 #define Z80DBLREG_UPPER 0
@@ -27,4 +28,27 @@ typedef union Z80_DblRegister {
     uint8_t bytes[2];
 } Z80_DblRegister;
 
-/* Function Definitions */
+/********************************************************************
+
+    Z80 Init Functions
+
+********************************************************************/
+
+void Z80_init();
+void Z80_initSignals();
+
+/********************************************************************
+
+    Z80 Signal Functions
+
+********************************************************************/
+
+void Z80_signalCLCKListener(bool rising);
+
+/********************************************************************
+
+    Z80 Fetch Functions
+
+********************************************************************/
+
+void Z80_fetchT1Rise();

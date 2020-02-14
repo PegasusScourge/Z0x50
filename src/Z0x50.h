@@ -15,7 +15,7 @@ Can be run as a Sinclair ZX Spectrum or used as a basis for a larger project.
 
 */
 
-enum Z0StateEnum { Z0State_NONE, Z0State_SPECTRUM, Z0State_DECOMPILE }; // Our possible states we can execute in
+enum Z0StateEnum { Z0State_NONE, Z0State_SPECTRUM, Z0State_DECOMPILE, Z0State_TEST }; // Our possible states we can execute in
 
 /* CONSTS */
 extern const char* ASCII_headerArt;
