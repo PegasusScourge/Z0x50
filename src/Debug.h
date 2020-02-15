@@ -1,9 +1,9 @@
 #pragma once
 
-#ifdef _DEBUG
-#define __DEBUG 1
-#else
-#define __DEBUG 0
-#endif
+#define DEBUG_OUT stderr
 
-#define DEBUG_printf(fmt, ...) do { if (__DEBUG) { fprintf(stderr, "DEBUG: fn %s, ", __FUNCTION__); fprintf(stderr, fmt, __VA_ARGS__); } } while (0)
+#ifdef _DEBUG
+#define debug_printf(fmt, ...) fprintf(DEBUG_OUT, "[DEBUG] %s msg --> ", __FUNCTION__); fprintf(DEBUG_OUT, fmt, __VA_ARGS__);
+#else
+#define debug_printf(fmt, ...)
+#endif

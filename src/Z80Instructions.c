@@ -15,3 +15,6 @@ Z80Instructions.c : Instructions that the Z80 CPU can perform
 
 */
 
+#include "Z80Instructions.h"
+
+Z80_Instr_t nullInstruction;

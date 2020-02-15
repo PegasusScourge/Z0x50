@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Debug.c" />
     <ClCompile Include="src\Signals.c" />
     <ClCompile Include="src\Z0x50.c" />
     <ClCompile Include="src\Z80.c" />

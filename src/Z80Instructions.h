@@ -17,17 +17,26 @@ Z80Instructions.h : Instructions that the Z80 CPU can perform
 
 */
 
+#include <stdint.h>
+
 /* Struct defs */
 typedef struct Z80_Instr {
     char* string; // A pointer to the instruction string for human readability
     unsigned int type; // Instruction type reference for the Z80 etc
 
     /* Breakdown switch values of the opcode */
-    unsigned int x; // Bits 6 and 7
-    unsigned int y; // Bits 3, 4, 5
-    unsigned int z; // Bits 0, 1, 2 
-    unsigned int p; // Bits 4, 5
-    unsigned int q; // Bit 3
+    uint8_t opcode;
+    uint8_t x; // Bits 6 and 7
+    uint8_t y; // Bits 3, 4, 5
+    uint8_t z; // Bits 0, 1, 2 
+    uint8_t p; // Bits 4, 5
+    uint8_t q; // Bit 3
 
-    unsigned int numOperands; // Number of operands the instruction has after the opcode
+    uint8_t operand0; // In a two byte, represents the second byte read. Otherwise is first and only byte read.
+    uint8_t operand1; // In a two byte, is first byte read. Otherwise not needed.
+
+    uint8_t numOperands; // Number of operands the instruction has after the opcode
+    uint8_t numOperandsToRead; // Number of operands left to be read
 } Z80_Instr_t;
+
+extern Z80_Instr_t nullInstruction;

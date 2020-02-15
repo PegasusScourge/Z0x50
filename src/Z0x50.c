@@ -83,19 +83,19 @@ void Z0_parseArguments() {
     // Iterate through the arguments, starting at index 1
     for (int i = 1; i < argC; i++) {
         if (MATCHARG(i, "-D")) { // Decompile mode switch
-            DEBUG_printf("Set state: DECOMPILE\n");
+            debug_printf("Set state: DECOMPILE\n");
             // Set the state
             Z0_state = Z0State_DECOMPILE;
         }
         if (MATCHARG(i, "-T")) { // Test mode switch
-            DEBUG_printf("Set state: TEST\n");
+            debug_printf("Set state: TEST\n");
             // Set the state
             Z0_state = Z0State_TEST;
         }
         if (MATCHARG(i, "-c") && i < (argC - 1)){ // CFG select switch, only triggers if there is at least one more argument
             // Set the CFG
             Z0_overrideCfg = argV[++i];
-            DEBUG_printf("Set CFG: %s\n", Z0_overrideCfg);
+            debug_printf("Set CFG: %s\n", Z0_overrideCfg);
         }
     }
 

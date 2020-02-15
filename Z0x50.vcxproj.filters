@@ -18,9 +18,6 @@
     <ClCompile Include="src\Z0x50.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Debug.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Signals.c">
       <Filter>Source Files</Filter>
     </ClCompile>
