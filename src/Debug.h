@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdio.h>
+
 #define DEBUG_OUT stderr
 
 #ifdef _DEBUG

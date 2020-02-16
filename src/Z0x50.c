@@ -21,7 +21,7 @@ Can be run as a Sinclair ZX Spectrum or used as a basis for a larger project.
 #include "Z0x50.h"
 #include "Debug.h"
 #include "Signals.h"
-#include "Z80.h"
+#include "Z80/Z80.h"
 
 #define MATCHARG(a, b) strcmp(argV[a], b) == 0
 
@@ -49,8 +49,8 @@ void Z0_main() {
         break;
 
     case Z0State_TEST:
-        // Rotate the clock signal 20 times
-        for (int i = 0; i < 20; i++) {
+        // Rotate the clock signal 200 times
+        for (int i = 0; i < 200; i++) {
             clkV = !clkV;
             // printf("Clock now %i, iteration %i\n", clkV, i);
             if (clkV)

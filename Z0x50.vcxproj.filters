@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Z80">
+      <UniqueIdentifier>{0081fea9-3a0c-4cb7-8b90-d9b14bb827da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Z80">
+      <UniqueIdentifier>{d44e5662-f29f-4c2c-b476-36783138220e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Z0x50.c">
@@ -21,17 +27,17 @@
     <ClCompile Include="src\Signals.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Z80Decompile.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Z80\Z80.c">
+      <Filter>Source Files\Z80</Filter>
     </ClCompile>
-    <ClCompile Include="src\Z80.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Z80\Z80Alu.c">
+      <Filter>Source Files\Z80</Filter>
     </ClCompile>
-    <ClCompile Include="src\Z80Alu.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Z80\Z80Decompile.c">
+      <Filter>Source Files\Z80</Filter>
     </ClCompile>
-    <ClCompile Include="src\Z80Instructions.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Z80\Z80Instructions.c">
+      <Filter>Source Files\Z80</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,23 +50,23 @@
     <ClInclude Include="src\Signals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Z80Decompile.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\Z80\Z80.h">
+      <Filter>Header Files\Z80</Filter>
     </ClInclude>
-    <ClInclude Include="src\Z80InstrTypes.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\Z80\Z80Alu.h">
+      <Filter>Header Files\Z80</Filter>
     </ClInclude>
-    <ClInclude Include="src\Z80.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\Z80\Z80Decompile.h">
+      <Filter>Header Files\Z80</Filter>
     </ClInclude>
-    <ClInclude Include="src\Z80Alu.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\Z80\Z80FlagAccess.h">
+      <Filter>Header Files\Z80</Filter>
     </ClInclude>
-    <ClInclude Include="src\Z80FlagAccess.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\Z80\Z80InstrTypes.h">
+      <Filter>Header Files\Z80</Filter>
     </ClInclude>
-    <ClInclude Include="src\Z80Instructions.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\Z80\Z80Instructions.h">
+      <Filter>Header Files\Z80</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

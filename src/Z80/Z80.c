@@ -19,10 +19,9 @@ Z80.c : Z80 CPU component
 #include "Z80FlagAccess.h"
 #include "Z80Instructions.h"
 
-#include "Signals.h"
+#include "../Signals.h"
 
-// NOT ACTUALLY NEEDED, JUST FOR TESTING
-#include <stdio.h>
+#include "../Debug.h"
 
 /********************************************************************
 
@@ -169,12 +168,15 @@ Activates on the rising edge of M1T1.
 Place PC on the address bus, set MREQ, RD and RFSH high, set M1 low
 This allows the external circuitry to prepare to recieve the memory location we want to read from
 */
+#define Z80_fetchCycleStart Z80_M1T1Rise
 void Z80_M1T1Rise() {
     if (internalState != Z80State_Fetch) {
         // We require to match the fetch state!
         // Generate an error here?
+        debug_printf("[ERROR] Fetch start failed: not in fetch state\n");
         return; // For now just return. This will halt the processor
     }
+    debug_printf("[FETCH]\n");
 
     // Set the necessary signals high
     signals_raiseSignal(&signal_MREQ);
@@ -224,7 +226,7 @@ void Z80_M1T2Fall() {
 
     // No signals to manipulate
     // Take in a value from the data bus and store in cInstr
-    cInstr = nullInstruction; // Clear the instruction to null
+    cInstr = instructions_nullInstruction; // Clear the instruction to null
     cInstr.opcode = signal_dataBus; // HERE we take in the value
 
     // The next thing to do is perform a rudimentary decode on the next rising edge (M1T3). At the same time various signals toggle
@@ -304,7 +306,9 @@ void Z80_M1T4Fall() {
 Activates on the rising edge of MREADT1
 Puts addressBusLatch on the address bus
 */
+#define Z80_memReadCycleStart Z80_memReadT1Rise
 void Z80_memReadT1Rise() {
+    debug_printf("[MEM READ]\n");
     // We are doing a memory read cycle, so irrespective of state we continue
 
     // Put the address on the bus
@@ -364,7 +368,9 @@ void Z80_memReadT2Fall() {
 Activates on the rising edge of MWRITET1
 Puts addressBusLatch on the address bus
 */
+#define Z80_memWriteCycleStart Z80_memWriteT1Rise
 void Z80_memWriteT1Rise() {
+    debug_printf("[MEM WRITE]\n");
     // We are doing a memory write cycle, so irrespective of state we continue
 
     // Put the address on the bus
@@ -424,8 +430,10 @@ Activates on the rising edge of M1T4
 Sets up the operand read
 */
 void Z80_prepReadOperands() {
+    debug_printf("[OPERANDS: %i]\n", cInstr.numOperandsToRead);
+
     // The next rising edge needs to be a memory read cycle
-    onNextRisingCLCK = &Z80_memReadT1Rise;
+    onNextRisingCLCK = &Z80_memReadCycleStart;
 
     // The return location is either the execute instruction function or a second operand read
     if (cInstr.numOperandsToRead == 1) {
@@ -459,7 +467,15 @@ Activates on the rising edge of M1T4 or when an execution can be completed in a 
 Executes the opcode and decides if we need a memory write cycle after
 */
 void Z80_executeInstruction() {
+    // Set to execute state
+    internalState = Z80State_Execute;
 
+    debug_printf("[EXECUTE]\n");
+
+    // Excution finished for now, set to the next M1 cycle
+    onFinishMCycle = &Z80_fetchCycleStart;
+    // Set back to fetch state
+    internalState = Z80State_Fetch;
 }
 
 /********************************************************************
@@ -473,5 +489,16 @@ Activates on the rising edge of M1T3 as part of the M1T3Rise fetch function
 Decodes the opcode
 */
 void Z80_decode() {
+    // We have a cInstr struct with a .opcode value
+    // We take this and split the bit fields for easier decoding
+    cInstr.z = (cInstr.opcode & 0b11000000) >> 6;
+    cInstr.y = (cInstr.opcode & 0b00111000) >> 3;
+    cInstr.z = (cInstr.opcode & 0b00000111);
+    cInstr.p = cInstr.y >> 1;
+    cInstr.q = cInstr.y % 2;
 
+    // Now we retrieve the human-readable pointer
+    cInstr.string = instructions_humanOpcodeText[cInstr.opcode];
+    debug_printf("[DECODE]\n");
+    debug_printf("opcode %s (pc: %04X, %02X)\n", cInstr.string, PC.v, cInstr.opcode);
 }

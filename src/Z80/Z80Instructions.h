@@ -17,6 +17,7 @@ Z80Instructions.h : Instructions that the Z80 CPU can perform
 
 */
 
+#include <stdbool.h>
 #include <stdint.h>
 
 /* Struct defs */
@@ -39,4 +40,10 @@ typedef struct Z80_Instr {
     uint8_t numOperandsToRead; // Number of operands left to be read
 } Z80_Instr_t;
 
-extern Z80_Instr_t nullInstruction;
+extern const Z80_Instr_t instructions_nullInstruction;
+
+/* Human-readable strings for the opcodes table */
+extern const char* instructions_humanOpcodeText[0x100]; // There are 256 opcodes in the primary table
+
+/* Opcode enable tables */
+extern const bool instructions_opcodeEnable[0x100];
