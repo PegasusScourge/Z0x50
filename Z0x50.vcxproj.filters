@@ -19,6 +19,12 @@
     <Filter Include="Source Files\Z80">
       <UniqueIdentifier>{d44e5662-f29f-4c2c-b476-36783138220e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Memory">
+      <UniqueIdentifier>{7c126ffe-2be2-4e22-abde-7be4f3fb1ff6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Memory">
+      <UniqueIdentifier>{a5d9d754-a807-4299-9759-a5667933b45d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Z0x50.c">
@@ -38,6 +44,12 @@
     </ClCompile>
     <ClCompile Include="src\Z80\Z80Instructions.c">
       <Filter>Source Files\Z80</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Memory\MemoryController.c">
+      <Filter>Source Files\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Memory\MemoryDevice.c">
+      <Filter>Source Files\Memory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -67,6 +79,12 @@
     </ClInclude>
     <ClInclude Include="src\Z80\Z80Instructions.h">
       <Filter>Header Files\Z80</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Memory\MemoryController.h">
+      <Filter>Header Files\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Memory\MemoryDevice.h">
+      <Filter>Header Files\Memory</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -20,7 +20,6 @@ Z80.c : Z80 CPU component
 #include "Z80Instructions.h"
 
 #include "../Signals.h"
-
 #include "../Debug.h"
 
 /********************************************************************
@@ -471,6 +470,8 @@ void Z80_executeInstruction() {
     internalState = Z80State_Execute;
 
     debug_printf("[EXECUTE]\n");
+    // Check the processor state: if we are in a decode mode, defer execution to the decode module
+
 
     // Excution finished for now, set to the next M1 cycle
     onFinishMCycle = &Z80_fetchCycleStart;
