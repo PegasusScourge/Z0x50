@@ -25,6 +25,12 @@
     <Filter Include="Header Files\Memory">
       <UniqueIdentifier>{a5d9d754-a807-4299-9759-a5667933b45d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\SysIO">
+      <UniqueIdentifier>{240aa821-4b68-4680-bdc2-788ff3f1e228}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SysIO">
+      <UniqueIdentifier>{6fc2c72a-4a13-4ecf-851a-032e8cfe587b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Z0x50.c">
@@ -50,6 +56,12 @@
     </ClCompile>
     <ClCompile Include="src\Memory\MemoryDevice.c">
       <Filter>Source Files\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SysIO\SysIO.c">
+      <Filter>Source Files\SysIO</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CfgReader.c">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +97,12 @@
     </ClInclude>
     <ClInclude Include="src\Memory\MemoryDevice.h">
       <Filter>Header Files\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SysIO\SysIO.h">
+      <Filter>Header Files\SysIO</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CfgReader.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

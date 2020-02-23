@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CfgReader.c" />
     <ClCompile Include="src\Memory\MemoryController.c" />
     <ClCompile Include="src\Memory\MemoryDevice.c" />
     <ClCompile Include="src\Signals.c" />
+    <ClCompile Include="src\SysIO\SysIO.c" />
     <ClCompile Include="src\Z0x50.c" />
     <ClCompile Include="src\Z80\Z80.c" />
     <ClCompile Include="src\Z80\Z80Alu.c" />
@@ -29,10 +31,12 @@
     <ClCompile Include="src\Z80\Z80Instructions.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\CfgReader.h" />
     <ClInclude Include="src\Debug.h" />
     <ClInclude Include="src\Memory\MemoryController.h" />
     <ClInclude Include="src\Memory\MemoryDevice.h" />
     <ClInclude Include="src\Signals.h" />
+    <ClInclude Include="src\SysIO\SysIO.h" />
     <ClInclude Include="src\Z0x50.h" />
     <ClInclude Include="src\Z80\Z80.h" />
     <ClInclude Include="src\Z80\Z80Alu.h" />
@@ -128,7 +132,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
@@ -166,7 +170,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>CompileAsC</CompileAs>
     </ClCompile>

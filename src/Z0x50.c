@@ -22,6 +22,8 @@ Can be run as a Sinclair ZX Spectrum or used as a basis for a larger project.
 #include "Debug.h"
 #include "Signals.h"
 #include "Z80/Z80.h"
+#include "Memory/MemoryController.h"
+#include "CfgReader.h"
 
 #define MATCHARG(a, b) strcmp(argV[a], b) == 0
 
@@ -50,7 +52,7 @@ void Z0_main() {
 
     case Z0State_TEST:
         // Rotate the clock signal 200 times
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 1; i++) {
             clkV = !clkV;
             // printf("Clock now %i, iteration %i\n", clkV, i);
             if (clkV)
@@ -71,7 +73,9 @@ void Z0_main() {
 
 // Initialisation of the system from the arguments and CFG
 void Z0_initSystem() {
-    // For now, just init the Z80
+    // Init the memory
+    memoryController_init();
+    // Init the Z80
     Z80_init();
 }
 
@@ -122,7 +126,8 @@ int main(int argc, char* argv[]) {
     Z0_parseArguments();
 
     // TODO - parse the CFG file
-    printf("Parsing CFG: TODO\n");
+    printf("Parsing CFG:\n");
+    cfgReader_readConfiguration("configuration.cfg");
 
     printf("Initialising system\n");
     Z0_initSystem();
