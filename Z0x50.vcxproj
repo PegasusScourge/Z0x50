@@ -23,6 +23,7 @@
     <ClCompile Include="src\Memory\MemoryController.c" />
     <ClCompile Include="src\Memory\MemoryDevice.c" />
     <ClCompile Include="src\Signals.c" />
+    <ClCompile Include="src\StringUtil.c" />
     <ClCompile Include="src\SysIO\SysIO.c" />
     <ClCompile Include="src\Z0x50.c" />
     <ClCompile Include="src\Z80\Z80.c" />
@@ -36,6 +37,7 @@
     <ClInclude Include="src\Memory\MemoryController.h" />
     <ClInclude Include="src\Memory\MemoryDevice.h" />
     <ClInclude Include="src\Signals.h" />
+    <ClInclude Include="src\StringUtil.h" />
     <ClInclude Include="src\SysIO\SysIO.h" />
     <ClInclude Include="src\Z0x50.h" />
     <ClInclude Include="src\Z80\Z80.h" />

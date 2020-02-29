@@ -63,6 +63,9 @@
     <ClCompile Include="src\CfgReader.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\StringUtil.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Debug.h">
@@ -102,6 +105,9 @@
       <Filter>Header Files\SysIO</Filter>
     </ClInclude>
     <ClInclude Include="src\CfgReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\StringUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

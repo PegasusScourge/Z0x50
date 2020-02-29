@@ -18,12 +18,16 @@ CfgReader.c : Reads the CFG file and exposes the settings
 #include "Debug.h"
 #include "CfgReader.h"
 #include "SysIO/SysIO.h"
+#include "StringUtil.h"
 
 #include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
 
 SysFile_t* cfgFile;
+
+#define MAX_NUM_SETTINGS 256
+Setting_t* settings[MAX_NUM_SETTINGS];
+int currentSetting = 0;
 
 /********************************************************************
 
@@ -73,57 +77,6 @@ void cfgReader_destroySetting(Setting_t* s) {
 
 /********************************************************************
 
-    String Functions
-
-********************************************************************/
-
-/*
-Part of the strtrim() function
-*/
-char* str_ltrim(char* str, const char* seps) {
-    size_t totrim;
-    if (seps == NULL) {
-        seps = "\t\n\v\f\r ";
-    }
-    totrim = strspn(str, seps);
-    if (totrim > 0) {
-        size_t len = strlen(str);
-        if (totrim == len) {
-            str[0] = '\0';
-        }
-        else {
-            memmove(str, str + totrim, len + 1 - totrim);
-        }
-    }
-    return str;
-}
-
-/*
-Part of the strtrim() function
-*/
-char* str_rtrim(char* str, const char* seps) {
-    int i;
-    if (seps == NULL) {
-        seps = "\t\n\v\f\r ";
-    }
-    i = (int)strlen(str) - 1;
-    while (i >= 0 && strchr(seps, str[i]) != NULL) {
-        str[i] = '\0';
-        i--;
-    }
-    return str;
-}
-
-/*
-Takes a string char* and characters to trim off the front and back of the string. If seps is NULL, these are provided automatically
-Returns the trimmed string
-*/
-char* strtrim(char* str, const char* seps) {
-    return str_ltrim(str_rtrim(str, seps), seps);
-}
-
-/********************************************************************
-
     Cfg Functions
 
 ********************************************************************/
@@ -149,7 +102,7 @@ void cfgReader_readConfiguration(const char* path) {
     cfgFile = NULL;
 }
 
-void cfgReader_processConfiguration(const uint8_t* data, const long int size) {
+void cfgReader_processConfiguration(const char* data, const long int size) {
     // Copy the data into another buffer
     char* buffer = calloc(size, sizeof(char));
     if (buffer == NULL) {
@@ -185,7 +138,7 @@ void cfgReader_processConfiguration(const uint8_t* data, const long int size) {
 
     while (line != NULL && linesDetected < MAX_NUM_LINES) {
         // Save the current pointer
-        lines[linesDetected] = strtrim(line, NULL);
+        lines[linesDetected] = sutil_trim(line, NULL);
 
         // Get the next line
         line = strtok(NULL, token);
@@ -210,12 +163,12 @@ void cfgReader_processConfiguration(const uint8_t* data, const long int size) {
     free(baseOfBuffer);
 }
 
-#define isStr(a, b) strcmp(a, b) == 0
-#define checkSplit(a, b) isStr(splits[0], a) && splitsDetected >= b
-void cfgReader_processLine(const char* l) {
+#define strequal(a, b) strcmp(a, b) == 0
+#define checkSplit(a, b) strequal(splits[0], a) && splitsDetected >= b
+void cfgReader_processLine(const char* ln) {
     // We now need to split the line by '=' chars and trim
     // Create a buffer to play with
-    int buffLen = (int)strlen(l) + 1; // Make space for a padding null terminator
+    int buffLen = (int)strlen(ln) + 1; // Make space for a padding null terminator
     char* buff = calloc(buffLen, sizeof(char)); // NEED TO FREE
     if (buff == NULL) {
         debug_printf("[CFG PROCESS] Could not process line: allocation of line buffer failed\n");
@@ -229,7 +182,7 @@ void cfgReader_processLine(const char* l) {
     char token[2] = "=";
 
     // Fill the buff
-    strcpy(buff, l);
+    strcpy(buff, ln);
     buff[buffLen - 1] = '\0'; // Make sure we have a null terminator
 
     // FROM THIS POINT buff WILL CHANGE VALUE, FREE MEMORY WITH buffBase
@@ -239,7 +192,7 @@ void cfgReader_processLine(const char* l) {
     split = strtok(buff, token);
 
     while (split != NULL && splitsDetected < NUM_SPLITS) {
-        splits[splitsDetected] = strtrim(split, NULL);
+        splits[splitsDetected] = sutil_trim(split, NULL);
 
         // Get the next line
         split = strtok(NULL, token);
@@ -256,15 +209,31 @@ void cfgReader_processLine(const char* l) {
 
     // Check that we have splits
     if (splitsDetected > 0) {
+        Setting_t* s = NULL;
+
         // Process the line
         if (checkSplit("testLine", 2)) {
             debug_printf("testLine says: '%s'\n", splits[1]);
         }
         // --- CLOCK SETTINGS
         else if (checkSplit("clock_speed", 2)) {
-
+            s = cfgReader_createSetting("clock_speed");
+            s->value = atoi(splits[1]);
         }
         // --- ANYTHING ELSE?
+        else if(splitsDetected == 2) {
+            // If we have 2 splits, just add the setting anyway at this point
+            s = cfgReader_createSetting(splits[0]);
+            s->value = atoi(splits[1]);
+            debug_printf("Auto-setting generation:\n");
+        }
+
+        // If the setting isn't NULL, add it to the list
+        if (s != NULL) {
+            settings[currentSetting] = s;
+            debug_printf("Added setting '%s' at index %i\n", s->name, currentSetting);
+            currentSetting++;
+        }
     }
 
     // Free the buffer
