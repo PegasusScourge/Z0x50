@@ -20,7 +20,7 @@ Z80.c : Z80 CPU component
 #include "Z80Instructions.h"
 
 #include "../Signals.h"
-#include "../Debug.h"
+#include "../SysIO/Log.h"
 
 /********************************************************************
 
@@ -172,10 +172,10 @@ void Z80_M1T1Rise() {
     if (internalState != Z80State_Fetch) {
         // We require to match the fetch state!
         // Generate an error here?
-        debug_printf("[ERROR] Fetch start failed: not in fetch state\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Fetch start failed: not in fetch state\n");
         return; // For now just return. This will halt the processor
     }
-    debug_printf("[FETCH]\n");
+    printf("[FETCH]\n");
 
     // Set the necessary signals high
     signals_raiseSignal(&signal_MREQ);
@@ -307,7 +307,7 @@ Puts addressBusLatch on the address bus
 */
 #define Z80_memReadCycleStart Z80_memReadT1Rise
 void Z80_memReadT1Rise() {
-    debug_printf("[MEM READ]\n");
+    printf("[MEM READ]\n");
     // We are doing a memory read cycle, so irrespective of state we continue
 
     // Put the address on the bus
@@ -369,7 +369,7 @@ Puts addressBusLatch on the address bus
 */
 #define Z80_memWriteCycleStart Z80_memWriteT1Rise
 void Z80_memWriteT1Rise() {
-    debug_printf("[MEM WRITE]\n");
+    printf("[MEM WRITE]\n");
     // We are doing a memory write cycle, so irrespective of state we continue
 
     // Put the address on the bus
@@ -429,7 +429,7 @@ Activates on the rising edge of M1T4
 Sets up the operand read
 */
 void Z80_prepReadOperands() {
-    debug_printf("[OPERANDS: %i]\n", cInstr.numOperandsToRead);
+    printf("[OPERANDS: %i]\n", cInstr.numOperandsToRead);
 
     // The next rising edge needs to be a memory read cycle
     onNextRisingCLCK = &Z80_memReadCycleStart;
@@ -469,7 +469,7 @@ void Z80_executeInstruction() {
     // Set to execute state
     internalState = Z80State_Execute;
 
-    debug_printf("[EXECUTE]\n");
+    printf("[EXECUTE]\n");
     // Check the processor state: if we are in a decode mode, defer execution to the decode module
 
 
@@ -500,6 +500,6 @@ void Z80_decode() {
 
     // Now we retrieve the human-readable pointer
     cInstr.string = instructions_humanOpcodeText[cInstr.opcode];
-    debug_printf("[DECODE]\n");
-    debug_printf("opcode %s (pc: %04X, %02X)\n", cInstr.string, PC.v, cInstr.opcode);
+    formattedLog(debuglog, LOGTYPE_DEBUG, "[DECODE]\n");
+    formattedLog(debuglog, LOGTYPE_DEBUG, "opcode %s (pc: %04X, %02X)\n", cInstr.string, PC.v, cInstr.opcode);
 }

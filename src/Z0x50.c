@@ -19,11 +19,11 @@ Can be run as a Sinclair ZX Spectrum or used as a basis for a larger project.
 #include <string.h>
 
 #include "Z0x50.h"
-#include "Debug.h"
 #include "Signals.h"
 #include "Z80/Z80.h"
 #include "Memory/MemoryController.h"
 #include "CfgReader.h"
+#include "SysIO/Log.h"
 
 #define MATCHARG(a, b) strcmp(argV[a], b) == 0
 
@@ -87,19 +87,19 @@ void Z0_parseArguments() {
     // Iterate through the arguments, starting at index 1
     for (int i = 1; i < argC; i++) {
         if (MATCHARG(i, "-D")) { // Decompile mode switch
-            debug_printf("Set state: DECOMPILE\n");
+            directLog(stdlog, "Set state: DECOMPILE\n");
             // Set the state
             Z0_state = Z0State_DECOMPILE;
         }
         if (MATCHARG(i, "-T")) { // Test mode switch
-            debug_printf("Set state: TEST\n");
+            directLog(stdlog, "Set state: TEST\n");
             // Set the state
             Z0_state = Z0State_TEST;
         }
         if (MATCHARG(i, "-c") && i < (argC - 1)){ // CFG select switch, only triggers if there is at least one more argument
             // Set the CFG
             Z0_overrideCfg = argV[++i];
-            debug_printf("Set CFG: %s\n", Z0_overrideCfg);
+            directLog(stdlog, "Set CFG: %s\n", Z0_overrideCfg);
         }
     }
 
@@ -112,27 +112,33 @@ int main(int argc, char* argv[]) {
     argV = argv;
     argC = argc;
 
-    // Print the header art from the ASCII file.
-    printf(ASCII_terminalSlpit);
-    printf(ASCII_headerArt);
-    printf("\n\nZ0x50 | Zilog 80 Emulator | Created by Matthew Clarke\n");
-#ifdef _DEBUG
-    printf("[COMPILED IN DEBUG MODE]\n");
-#endif
-    printf(ASCII_terminalSlpit);
+    // Open the log files
+    log_initLogFiles();
 
-    printf("Parsing command line arguments\n");
+    // Print the header art from the ASCII file.
+    directLog(stdlog, ASCII_terminalSlpit);
+    directLog(stdlog, ASCII_headerArt);
+    directLog(stdlog, "\n\nZ0x50 | Zilog 80 Emulator | Created by Matthew Clarke\n");
+#ifdef _DEBUG
+    directLog(stdlog, "[COMPILED IN DEBUG MODE]\n");
+#endif
+    directLog(stdlog, ASCII_terminalSlpit);
+
+    directLog(stdlog, "Parsing command line arguments\n");
     // Call the parsing function, passing the arguments we recieved
     Z0_parseArguments();
 
-    // TODO - parse the CFG file
-    printf("Parsing CFG:\n");
+    // Parse cfg
+    directLog(stdlog, "Parsing CFG:\n");
     cfgReader_readConfiguration("configuration.cfg");
 
-    printf("Initialising system\n");
+    directLog(stdlog, "Initialising system\n");
     Z0_initSystem();
 
-    printf("Launching\n");
+    directLog(stdlog, "Launching\n");
     // Call the main function
     Z0_main();
+
+    // Close
+    log_closeLogFiles();
 }

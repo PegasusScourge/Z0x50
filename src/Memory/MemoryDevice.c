@@ -16,7 +16,7 @@ MemoryDevice.c : Memory device definitions
 */
 
 #include "MemoryDevice.h"
-#include "../Debug.h"
+#include "../SysIO/Log.h"
 
 #include <stdlib.h>
 
@@ -27,7 +27,7 @@ MemoryDevice_t* memoryDevice_create(uint16_t sOffset, uint16_t len, bool wEn, bo
     // Create the device
     MemoryDevice_t* device = malloc(sizeof(MemoryDevice_t));
     if (device == NULL) {
-        debug_printf("[ERROR] Failed to create memory device!\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Failed to create memory device!\n");
         return NULL;
     }
 
@@ -40,7 +40,7 @@ MemoryDevice_t* memoryDevice_create(uint16_t sOffset, uint16_t len, bool wEn, bo
     // Create the data buffer
     device->data = calloc(len, sizeof(uint8_t));
     if (device->data == NULL) {
-        debug_printf("[ERROR] Failed to allocate memory for memory device (len=%i bytes)\n", len);
+        formattedLog(stdlog, LOGTYPE_ERROR, "Failed to allocate memory for memory device (len=%i bytes)\n", len);
         // Deallocate the memory device and return NULL
         memoryDevice_deconstruct(device);
         return NULL;
@@ -56,14 +56,14 @@ Deconstructs a device and frees the memory associated with it
 void memoryDevice_deconstruct(MemoryDevice_t* device) {
     // Check the device is valid
     if (device == NULL) {
-        debug_printf("[ERROR] Cannot deallocate a NULL device!\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Cannot deallocate a NULL device!\n");
         return;
     }
 
     // Deallocate the data inside the memory device first
     // Check the data is valid
     if (device->data == NULL) {
-        debug_printf("[ERROR] Cannot deallocate a NULL data!\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Cannot deallocate a NULL data!\n");
     }
     else {
         // Free the data

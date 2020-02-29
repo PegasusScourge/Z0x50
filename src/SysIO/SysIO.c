@@ -15,7 +15,7 @@ SysIO.c : System I/O for the filesystem of the host.
 
 */
 
-#include "../Debug.h"
+#include "Log.h"
 #include "SysIO.h"
 
 /********************************************************************
@@ -33,7 +33,7 @@ SysFile_t* sysIO_openFile(const char* path) {
     SysFile_t* file = malloc(sizeof(SysFile_t));
     // Check we got the struct made
     if (file == NULL) {
-        debug_printf("Cannot open file '%s' with mode '%s': unable to allocate struct\n", path, mode);
+        formattedLog(stdlog, LOGTYPE_ERROR, "Cannot open file '%s' with mode '%s': unable to allocate struct\n", path, mode);
         return NULL;
     }
 
@@ -42,7 +42,7 @@ SysFile_t* sysIO_openFile(const char* path) {
     // Time to open the file handle
     file->fPtr = fopen(path, mode);
     if (file->fPtr == NULL) {
-        debug_printf("Cannot open file '%s' with mode '%s'\n", path, mode);
+        formattedLog(stdlog, LOGTYPE_ERROR, "Cannot open file '%s' with mode '%s'\n", path, mode);
         return NULL;
     }
 
@@ -54,7 +54,7 @@ SysFile_t* sysIO_openFile(const char* path) {
 
     // Return the struct
     file->cached = false;
-    debug_printf("File '%s' opened successfully\n", file->path);
+    formattedLog(debuglog, LOGTYPE_MSG, "File '%s' opened successfully\n", file->path);
     return file;
 }
 
@@ -67,32 +67,32 @@ void sysIO_closeFile(SysFile_t* file) {
         return;
     }
     
-    debug_printf("[SYS IO] Closing file '%s':", file->path);
+    formattedLog(debuglog, LOGTYPE_DEBUG, "[SYS IO] Closing file '%s':", file->path);
     
     // Start deallocating the parts
 
-    fprintf(DEBUG_OUT, " [DATA:");
+    directLog(debuglog, " [DATA:");
     if (file->data != NULL) {
         free(file->data);
-        fprintf(DEBUG_OUT, "OK]");
+        directLog(debuglog, "OK]");
     }
     else {
-        fprintf(DEBUG_OUT, "NULL]");
+        directLog(debuglog, "NULL]");
     }
 
     // Close the file stream
-    fprintf(DEBUG_OUT, " [FPTR:");
+    directLog(debuglog, " [FPTR:");
     if (file->fPtr != NULL) {
         fclose(file->fPtr);
-        fprintf(DEBUG_OUT, "OK]");
+        directLog(debuglog, "OK]");
     }
     else {
-        fprintf(DEBUG_OUT, "NULL]");
+        directLog(debuglog, "NULL]");
     }
 
     // Deallocate the struct
     free(file);
-    fprintf(DEBUG_OUT, " [CLOSED]\n");
+    directLog(debuglog, " [CLOSED]\n");
 }
 
 /*
@@ -101,26 +101,26 @@ Cache the file data into file->data
 void sysIO_cacheFile(SysFile_t* file) {
     // Check for file validity
     if (file == NULL) {
-        debug_printf("Unable to cache file content: file struct ptr is null!\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Unable to cache file content: file struct ptr is null!\n");
         return;
     }
 
     // Check that we have a file handle
     if (file->fPtr == NULL) {
-        debug_printf("Unable to cache file content: file handle ptr is null!\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Unable to cache file content: file handle ptr is null!\n");
         return;
     }
 
     // Check we have a size quantity
     if (file->size <= 0) {
-        debug_printf("Unable to cache file content of file '%s': could not find a length of file\n", file->path);
+        formattedLog(stdlog, LOGTYPE_ERROR, "Unable to cache file content of file '%s': could not find a length of file\n", file->path);
         return;
     }
 
     // Allocate space for the file to be read into
     file->data = calloc(file->size, sizeof(char));
     if (file->data == NULL) {
-        debug_printf("Unable to cache file content of file '%s': could not allocate memory\n", file->path);
+        formattedLog(stdlog, LOGTYPE_ERROR, "Unable to cache file content of file '%s': could not allocate memory\n", file->path);
         return;
     }
 
@@ -139,6 +139,6 @@ void sysIO_cacheFile(SysFile_t* file) {
     file->data[file->size - 1] = '\0';
 
     // File read complete!
-    debug_printf("Cached file '%s' of size %i bytes (finished at byte %i)\n", file->path, file->size, ftell(file->fPtr));
+    formattedLog(debuglog, LOGTYPE_DEBUG, "Cached file '%s' of size %i bytes (finished at byte %i)\n", file->path, file->size, ftell(file->fPtr));
     file->cached = true;
 }

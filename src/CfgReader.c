@@ -15,7 +15,7 @@ CfgReader.c : Reads the CFG file and exposes the settings
 
 */
 
-#include "Debug.h"
+#include "SysIO/Log.h"
 #include "CfgReader.h"
 #include "SysIO/SysIO.h"
 #include "StringUtil.h"
@@ -41,13 +41,13 @@ Creates a Setting_t to hold information about settings
 Setting_t* cfgReader_createSetting(const char* name) {
     Setting_t* s = malloc(sizeof(Setting_t));
     if (s == NULL) {
-        debug_printf("Unable to create Setting_t: can't allocate memory for struct\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Unable to create Setting_t: can't allocate memory for struct\n");
         return NULL;
     }
 
     s->name = calloc(strlen(name), sizeof(char));
     if (s->name == NULL) {
-        debug_printf("Unable to create Setting_t: can't allocate memory for name str\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Unable to create Setting_t: can't allocate memory for name str\n");
         return NULL;
     }
 
@@ -62,7 +62,7 @@ Destroys a Setting_t and cleans up memory after it
 */
 void cfgReader_destroySetting(Setting_t* s) {
     if (s == NULL) {
-        debug_printf("Attempted to destroy NULL Setting_t\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Attempted to destroy NULL Setting_t\n");
         return;
     }
 
@@ -90,7 +90,7 @@ void cfgReader_readConfiguration(const char* path) {
 
     // Check it is cached
     if (!cfgFile->cached) {
-        fprintf(stderr, "Unable to read configuration file! Terminating\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Unable to read configuration file! Terminating\n");
         exit(-1);
     }
 
@@ -106,15 +106,15 @@ void cfgReader_processConfiguration(const char* data, const long int size) {
     // Copy the data into another buffer
     char* buffer = calloc(size, sizeof(char));
     if (buffer == NULL) {
-        debug_printf("[CFG PROCESS] Failed to process CFG: could not allocate %i bytes for buffer. Terminating\n", size);
+        formattedLog(stdlog, LOGTYPE_ERROR, "[CFG PROCESS] Failed to process CFG: could not allocate %i bytes for buffer. Terminating\n", size);
         exit(-1);
     }
-    debug_printf("[CFG PROCESS] Allocated buffer of %i bytes\n", size);
+    formattedLog(debuglog, LOGTYPE_DEBUG, "[CFG PROCESS] Allocated buffer of %i bytes\n", size);
     strcpy(buffer, data);
     
     // Check that the last character is a '\0'
     if (buffer[size - 1] != '\0') {
-        debug_printf("[CFG PROCESS] Added null char, overwrote char '%c'\n", buffer[size - 1]);
+        formattedLog(debuglog, LOGTYPE_DEBUG, "[CFG PROCESS] Added null char, overwrote char '%c'\n", buffer[size - 1]);
         buffer[size - 1] = '\0';
     }
 
@@ -146,11 +146,11 @@ void cfgReader_processConfiguration(const char* data, const long int size) {
     }
 
     // Debug printing
-    debug_printf("[CFG PROCESS] Split file into %i lines:\n", linesDetected);
+    directLog(debuglog, "[CFG PROCESS] Split file into %i lines:\n", linesDetected);
     for (int i = 0; i < linesDetected; i++) {
-        fprintf(DEBUG_OUT, "'");
-        fprintf(DEBUG_OUT, lines[i]);
-        fprintf(DEBUG_OUT, "'\n");
+        directLog(debuglog, "'");
+        directLog(debuglog, lines[i]);
+        directLog(debuglog, "'\n");
     }
 
     // Now iterate through the lines and process them
@@ -159,7 +159,7 @@ void cfgReader_processConfiguration(const char* data, const long int size) {
     }
 
     // Free the buffer
-    debug_printf("[CFG PROCESS] Freeing buffer\n");
+    directLog(debuglog, "[CFG PROCESS] Freeing buffer\n");
     free(baseOfBuffer);
 }
 
@@ -171,7 +171,7 @@ void cfgReader_processLine(const char* ln) {
     int buffLen = (int)strlen(ln) + 1; // Make space for a padding null terminator
     char* buff = calloc(buffLen, sizeof(char)); // NEED TO FREE
     if (buff == NULL) {
-        debug_printf("[CFG PROCESS] Could not process line: allocation of line buffer failed\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "[CFG PROCESS] Could not process line: allocation of line buffer failed\n");
         return; // Just continue
     }
     char* buffBase = buff;
@@ -213,25 +213,18 @@ void cfgReader_processLine(const char* ln) {
 
         // Process the line
         if (checkSplit("testLine", 2)) {
-            debug_printf("testLine says: '%s'\n", splits[1]);
+            formattedLog(debuglog, LOGTYPE_DEBUG, "testLine says: '%s'\n", splits[1]);
         }
-        // --- CLOCK SETTINGS
-        else if (checkSplit("clock_speed", 2)) {
-            s = cfgReader_createSetting("clock_speed");
-            s->value = atoi(splits[1]);
-        }
-        // --- ANYTHING ELSE?
         else if(splitsDetected == 2) {
-            // If we have 2 splits, just add the setting anyway at this point
+            // If we have 2 splits, just add the setting
             s = cfgReader_createSetting(splits[0]);
             s->value = atoi(splits[1]);
-            debug_printf("Auto-setting generation:\n");
         }
 
         // If the setting isn't NULL, add it to the list
         if (s != NULL) {
             settings[currentSetting] = s;
-            debug_printf("Added setting '%s' at index %i\n", s->name, currentSetting);
+            formattedLog(debuglog, LOGTYPE_DEBUG, "Added setting '%s' at index %i\n", s->name, currentSetting);
             currentSetting++;
         }
     }

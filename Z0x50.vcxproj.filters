@@ -66,11 +66,11 @@
     <ClCompile Include="src\StringUtil.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\SysIO\Log.c">
+      <Filter>Source Files\SysIO</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Debug.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Z0x50.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -110,5 +110,16 @@
     <ClInclude Include="src\StringUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\SysIO\Log.h">
+      <Filter>Header Files\SysIO</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Workspace\Debug.log">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="Workspace\Z0x50.log">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

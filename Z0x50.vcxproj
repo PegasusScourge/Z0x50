@@ -24,6 +24,7 @@
     <ClCompile Include="src\Memory\MemoryDevice.c" />
     <ClCompile Include="src\Signals.c" />
     <ClCompile Include="src\StringUtil.c" />
+    <ClCompile Include="src\SysIO\Log.c" />
     <ClCompile Include="src\SysIO\SysIO.c" />
     <ClCompile Include="src\Z0x50.c" />
     <ClCompile Include="src\Z80\Z80.c" />
@@ -33,11 +34,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CfgReader.h" />
-    <ClInclude Include="src\Debug.h" />
     <ClInclude Include="src\Memory\MemoryController.h" />
     <ClInclude Include="src\Memory\MemoryDevice.h" />
     <ClInclude Include="src\Signals.h" />
     <ClInclude Include="src\StringUtil.h" />
+    <ClInclude Include="src\SysIO\Log.h" />
     <ClInclude Include="src\SysIO\SysIO.h" />
     <ClInclude Include="src\Z0x50.h" />
     <ClInclude Include="src\Z80\Z80.h" />
@@ -46,6 +47,10 @@
     <ClInclude Include="src\Z80\Z80FlagAccess.h" />
     <ClInclude Include="src\Z80\Z80InstrTypes.h" />
     <ClInclude Include="src\Z80\Z80Instructions.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Workspace\Debug.log" />
+    <Text Include="Workspace\Z0x50.log" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
