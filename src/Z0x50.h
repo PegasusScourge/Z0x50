@@ -22,7 +22,7 @@ extern const char* ASCII_headerArt;
 extern const char* ASCII_terminalSlpit;
 
 /* Z0x50 state information */
-extern int Z0_state; // The state we are currently executing in. Takes a value of Z0StateEnum
+extern int state; // The state we are currently executing in. Takes a value of Z0StateEnum
 
 /* Command line paramaters */
 extern char** argV;

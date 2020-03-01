@@ -17,6 +17,10 @@ CfgReader.h : Reads the CFG file and exposes the settings
 
 */
 
+#include <stdbool.h>
+
+#define NO_SETTING -32000
+
 typedef struct Setting {
     char* name;
     int value;
@@ -40,3 +44,12 @@ void cfgReader_destroySetting(Setting_t* s);
 void cfgReader_readConfiguration(const char* path);
 void cfgReader_processConfiguration(const char* data, const long int size);
 void cfgReader_processLine(const char* ln);
+
+/********************************************************************
+
+    Cfg Query Functions
+
+********************************************************************/
+
+int cfgReader_querySettingValue(const char* n);
+bool cfgReader_querySettingExist(const char* n);

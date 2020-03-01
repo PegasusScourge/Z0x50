@@ -77,6 +77,51 @@ void cfgReader_destroySetting(Setting_t* s) {
 
 /********************************************************************
 
+    Cfg Query Functions
+
+********************************************************************/
+
+/*
+Returns the value of a setting queried, or NO_SETTING by default
+*/
+int cfgReader_querySettingValue(const char* n) {
+    for (int i = 0; i < MAX_NUM_SETTINGS; i++) {
+        if (settings[i] != NULL) {
+            // Valid setting, now search for the name
+            if (settings[i]->name != NULL) {
+                // It has a name!
+                if (strcmp(n, settings[i]->name) == 0) {
+                    // It matches!
+                    return settings[i]->value;
+                }
+            }
+        }
+    }
+    // We don't have the setting, so return NO_SETTING
+    return NO_SETTING;
+}
+
+/*
+Returns the existance of a setting
+*/
+bool cfgReader_querySettingExist(const char* n) {
+    for (int i = 0; i < MAX_NUM_SETTINGS; i++) {
+        if (settings[i] != NULL) {
+            // Valid setting, now search for the name
+            if (settings[i]->name != NULL) {
+                // It has a name!
+                if (strcmp(n, settings[i]->name) == 0) {
+                    // It matches!
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+/********************************************************************
+
     Cfg Functions
 
 ********************************************************************/
@@ -232,3 +277,4 @@ void cfgReader_processLine(const char* ln) {
     // Free the buffer
     free(buffBase);
 }
+

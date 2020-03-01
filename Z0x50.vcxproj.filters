@@ -9,10 +9,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Header Files\Z80">
       <UniqueIdentifier>{0081fea9-3a0c-4cb7-8b90-d9b14bb827da}</UniqueIdentifier>
     </Filter>
@@ -30,6 +26,10 @@
     </Filter>
     <Filter Include="Source Files\SysIO">
       <UniqueIdentifier>{6fc2c72a-4a13-4ecf-851a-032e8cfe587b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Log Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -116,10 +116,10 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Workspace\Debug.log">
-      <Filter>Resource Files</Filter>
+      <Filter>Log Files</Filter>
     </Text>
     <Text Include="Workspace\Z0x50.log">
-      <Filter>Resource Files</Filter>
+      <Filter>Log Files</Filter>
     </Text>
   </ItemGroup>
 </Project>

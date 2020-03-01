@@ -43,6 +43,7 @@ SysFile_t* sysIO_openFile(const char* path) {
     file->fPtr = fopen(path, mode);
     if (file->fPtr == NULL) {
         formattedLog(stdlog, LOGTYPE_ERROR, "Cannot open file '%s' with mode '%s'\n", path, mode);
+        free(file);
         return NULL;
     }
 
