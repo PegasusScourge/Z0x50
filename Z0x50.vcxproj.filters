@@ -45,9 +45,6 @@
     <ClCompile Include="src\Z80\Z80Alu.c">
       <Filter>Source Files\Z80</Filter>
     </ClCompile>
-    <ClCompile Include="src\Z80\Z80Decompile.c">
-      <Filter>Source Files\Z80</Filter>
-    </ClCompile>
     <ClCompile Include="src\Z80\Z80Instructions.c">
       <Filter>Source Files\Z80</Filter>
     </ClCompile>
@@ -69,6 +66,9 @@
     <ClCompile Include="src\SysIO\Log.c">
       <Filter>Source Files\SysIO</Filter>
     </ClCompile>
+    <ClCompile Include="src\Z80\Z80Decomp.c">
+      <Filter>Source Files\Z80</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Z0x50.h">
@@ -81,9 +81,6 @@
       <Filter>Header Files\Z80</Filter>
     </ClInclude>
     <ClInclude Include="src\Z80\Z80Alu.h">
-      <Filter>Header Files\Z80</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Z80\Z80Decompile.h">
       <Filter>Header Files\Z80</Filter>
     </ClInclude>
     <ClInclude Include="src\Z80\Z80FlagAccess.h">
@@ -112,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="src\SysIO\Log.h">
       <Filter>Header Files\SysIO</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Z80\Z80Decomp.h">
+      <Filter>Header Files\Z80</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

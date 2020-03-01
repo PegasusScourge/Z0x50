@@ -17,8 +17,8 @@ Log.c : Handles logging
 
 #include "Log.h"
 
-FILE* stdlog;
-FILE* debuglog;
+FILE* stdlog = NULL;
+FILE* debuglog = NULL;
 
 void log_initLogFiles() {
     // Attempt to open the file pointers

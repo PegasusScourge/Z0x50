@@ -25,7 +25,7 @@ Can be run as a Sinclair ZX Spectrum or used as a basis for a larger project.
 #include "CfgReader.h"
 #include "SysIO/Log.h"
 #include "SysIO/SysIO.h"
-#include "Decomp/Z0xDecomp.h"
+#include "Z80/Z80Decomp.h"
 
 #define MATCHARG(a, b) strcmp(argV[a], b) == 0
 
@@ -55,7 +55,7 @@ int i = 0;
 void Z0_main() {
     switch (state) {
     case Z0State_DECOMPILE: // Process each instruction and report it to the decompilation log
-
+        decomp_next();
         break;
 
     case Z0State_TEST:
@@ -115,7 +115,7 @@ void Z0_initSystem() {
         }
 
         // We have the file loaded and can proceed
-        decomp_init();
+        decomp_init(decompilationFp);
         break;
 
     default:
@@ -192,6 +192,12 @@ int main(int argc, char* argv[]) {
     }
 
     formattedLog(stdlog, LOGTYPE_MSG, "Exiting\n");
+    // Check for a decomp file
+    if (decompilationFp) {
+        sysIO_closeFile(decompilationFp);
+        decompilationFp = NULL;
+    }
+
     // Close
     log_closeLogFiles();
 }

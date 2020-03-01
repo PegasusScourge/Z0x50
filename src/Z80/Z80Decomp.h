@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 
  _____   ____         ______ ____
@@ -11,8 +13,11 @@ Zilog 80 Emulator
 Basic interface to the Z80 processor and associated modules.
 Can be run as a Sinclair ZX Spectrum or used as a basis for a larger project.
 
-Z80Decompile.c : Decompilation code to take an input instruction and provide a breakdown of the instruction.
+Z0xDecomp.h : Handles decompilation
 
 */
 
-#include "Z80Decompile.h"
+#include "../SysIO/SysIO.h"
+
+void decomp_init(SysFile_t* file);
+void decomp_next();

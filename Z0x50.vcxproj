@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CfgReader.c" />
+    <ClCompile Include="src\Z80\Z80Decomp.c" />
     <ClCompile Include="src\Memory\MemoryController.c" />
     <ClCompile Include="src\Memory\MemoryDevice.c" />
     <ClCompile Include="src\Signals.c" />
@@ -29,11 +30,11 @@
     <ClCompile Include="src\Z0x50.c" />
     <ClCompile Include="src\Z80\Z80.c" />
     <ClCompile Include="src\Z80\Z80Alu.c" />
-    <ClCompile Include="src\Z80\Z80Decompile.c" />
     <ClCompile Include="src\Z80\Z80Instructions.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CfgReader.h" />
+    <ClInclude Include="src\Z80\Z80Decomp.h" />
     <ClInclude Include="src\Memory\MemoryController.h" />
     <ClInclude Include="src\Memory\MemoryDevice.h" />
     <ClInclude Include="src\Signals.h" />
@@ -43,7 +44,6 @@
     <ClInclude Include="src\Z0x50.h" />
     <ClInclude Include="src\Z80\Z80.h" />
     <ClInclude Include="src\Z80\Z80Alu.h" />
-    <ClInclude Include="src\Z80\Z80Decompile.h" />
     <ClInclude Include="src\Z80\Z80FlagAccess.h" />
     <ClInclude Include="src\Z80\Z80InstrTypes.h" />
     <ClInclude Include="src\Z80\Z80Instructions.h" />
