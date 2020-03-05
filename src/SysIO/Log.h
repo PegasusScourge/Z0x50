@@ -18,6 +18,7 @@ Log.h : Handles logging
 */
 
 #include <stdio.h>
+#include "SysIO.h"
 
 #define STDLOG_FILE "Z0x50.log"
 #define DBGLOG_FILE "Debug.log"
@@ -32,6 +33,7 @@ extern FILE* debuglog;
 
 void log_initLogFiles();
 void log_closeLogFiles();
+void log_dumpHexToDebug(int elementsPerLine, SysFile_t* file);
 
 #define directLog(fp, fmt, ...) if(fp) { fprintf(fp, fmt, __VA_ARGS__); } printf(fmt, __VA_ARGS__);
 #define formattedLog(fp, type, fmt, ...) if(fp) { fprintf(fp, type); fprintf(fp, fmt, __VA_ARGS__); } printf(type); printf(fmt, __VA_ARGS__);

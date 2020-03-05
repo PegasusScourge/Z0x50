@@ -127,17 +127,38 @@ void sysIO_cacheFile(SysFile_t* file) {
 
     // Time to read the file data in
     // Seek to the beginning of the file
-    fseek(file->fPtr, 0, SEEK_SET);
+    rewind(file->fPtr);
     // Begin reading the information
+
+    /*
+    int numX = 32;
+    int cX = 0;
     int i = 0;
-    char c = 0;
-    while ((c = fgetc(file->fPtr)) != EOF && i < file->size) {
-        file->data[i] = c;
+    int c = 0;
+    directLog(debuglog, "\n[Cache | Begin File : Size %04X | Values in Hex]\n[%04X]", file->size, i);
+    while (!feof(file->fPtr) && i < file->size) {
+        c = fgetc(file->fPtr);
+    // while (i < file->size) { c = fgetc(file->fPtr);
+        file->data[i] = (unsigned char)c;
+        directLog(debuglog, " %02X", file->data[i]);
+        cX++;
         i++;
+        if (cX >= numX) {
+            cX = 0;
+            directLog(debuglog, "\n[%04X]", i);
+        }
     }
+    directLog(debuglog, "\n[End File]\n\n");
+    */
+    fread(file->data, file->size, 1, file->fPtr);
 
     // Place the null terminator
     file->data[file->size - 1] = '\0';
+
+    // Check for an EOF failure
+    //if (c == EOF) {
+    //    formattedLog(stdlog, LOGTYPE_ERROR, "File cache of file '%s' failed with EOF at i=0x%02X\n", file->path, i - 1);
+    //}
 
     // File read complete!
     formattedLog(debuglog, LOGTYPE_DEBUG, "Cached file '%s' of size %i bytes (finished at byte %i)\n", file->path, file->size, ftell(file->fPtr));

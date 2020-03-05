@@ -31,6 +31,7 @@
     <ClCompile Include="src\Z80\Z80.c" />
     <ClCompile Include="src\Z80\Z80Alu.c" />
     <ClCompile Include="src\Z80\Z80Instructions.c" />
+    <ClCompile Include="src\Z80\Z80InstructionsText.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CfgReader.h" />

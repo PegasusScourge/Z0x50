@@ -45,3 +45,21 @@ void log_closeLogFiles() {
     if (debuglog)
         fclose(debuglog);
 }
+
+void log_dumpHexToDebug(int elementsPerLine, SysFile_t* file) {
+    int cX = 0;
+    int i = 0;
+    unsigned char v;
+    directLog(debuglog, "\n[Begin File '%s' : Size %04X]\n[%04X]", file->path, file->size, i);
+    while (i < file->size) {
+        v = file->data[i];
+        directLog(debuglog, " %02X", v);
+        cX++;
+        i++;
+        if (cX >= elementsPerLine && i < file->size) {
+            cX = 0;
+            directLog(debuglog, "\n[%04X]", i);
+        }
+    }
+    directLog(debuglog, "\n[End File]\n\n");
+}

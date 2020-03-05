@@ -499,7 +499,7 @@ void Z80_decode() {
     cInstr.q = cInstr.y % 2;
 
     // Now we retrieve the human-readable pointer
-    cInstr.string = instructions_humanOpcodeText[cInstr.opcode];
+    cInstr.string = instructions_mainInstructionText[cInstr.opcode];
     formattedLog(debuglog, LOGTYPE_DEBUG, "[DECODE]\n");
     formattedLog(debuglog, LOGTYPE_DEBUG, "opcode %s (pc: %04X, %02X)\n", cInstr.string, PC.v, cInstr.opcode);
 }

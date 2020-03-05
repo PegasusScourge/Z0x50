@@ -28,7 +28,7 @@ typedef struct SysFile {
     FILE* fPtr; // ALLOCATED: MUST FREE
     char path[256];
     long int size;
-    char* data; // ALLOCATED possibly: MUST FREE
+    unsigned char* data; // ALLOCATED possibly: MUST FREE
     bool cached;
 } SysFile_t;
 

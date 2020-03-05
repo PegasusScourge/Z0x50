@@ -1,4 +1,4 @@
 @echo off
 xcopy ..\x64\Debug\Z0x50.exe Z0x50.exe /Y
-Z0x50.exe -d test.rom
+Z0x50.exe -d ROMs/zx80.rom
 pause

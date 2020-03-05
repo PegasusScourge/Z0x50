@@ -45,9 +45,6 @@
     <ClCompile Include="src\Z80\Z80Alu.c">
       <Filter>Source Files\Z80</Filter>
     </ClCompile>
-    <ClCompile Include="src\Z80\Z80Instructions.c">
-      <Filter>Source Files\Z80</Filter>
-    </ClCompile>
     <ClCompile Include="src\Memory\MemoryController.c">
       <Filter>Source Files\Memory</Filter>
     </ClCompile>
@@ -67,6 +64,12 @@
       <Filter>Source Files\SysIO</Filter>
     </ClCompile>
     <ClCompile Include="src\Z80\Z80Decomp.c">
+      <Filter>Source Files\Z80</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Z80\Z80InstructionsText.c">
+      <Filter>Source Files\Z80</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Z80\Z80Instructions.c">
       <Filter>Source Files\Z80</Filter>
     </ClCompile>
   </ItemGroup>

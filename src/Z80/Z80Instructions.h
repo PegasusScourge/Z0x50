@@ -43,7 +43,11 @@ typedef struct Z80_Instr {
 extern const Z80_Instr_t instructions_nullInstruction;
 
 /* Human-readable strings for the opcodes table */
-extern const char* instructions_humanOpcodeText[0x100]; // There are 256 opcodes in the primary table
+extern const char* instructions_mainInstructionText[0x100]; // There are 256 opcodes in the primary table
+extern const char* instructions_extendedInstructionText[0xC0];
+extern const char* instructions_bitInstructionText[0x100];
 
-/* Opcode enable tables */
-extern const bool instructions_opcodeEnable[0x100];
+/* Instruction length and operand number information */
+#define PARAMS_LENGTH 0
+#define PARAMS_OPERANDN 1
+extern const int instructions_mainInstructionParams[0x100][2];
