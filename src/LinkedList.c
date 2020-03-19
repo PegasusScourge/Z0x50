@@ -80,24 +80,24 @@ void linkedList_destroy(LinkedList_t* list) {
 Counts the number of elements in the list and updates the internal count
 */
 void linkedList_countElements(LinkedList_t* list) {
-    formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" checking list\n");
+    // formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" checking list\n");
     if (list == NULL) {
         formattedLog(stdlog, LOGTYPE_WARN, "Attempted to count null linked list\n");
         return;
     }
 
-    formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" clear list count\n");
+    // formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" clear list count\n");
     list->numberOfElements = 0;
 
     ListElement_t* next = list->root;
     if (next == NULL) {
-        formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" next=%p, numElements=%i\n", next, list->numberOfElements);
+        // formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" next=%p, numElements=%i\n", next, list->numberOfElements);
         return;
     }
 
     do {
         list->numberOfElements++;
-        formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" next=%p, numElements=%i\n", next, list->numberOfElements);
+        // formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" next=%p, numElements=%i\n", next, list->numberOfElements);
     } while ((next = next->next) != NULL);
 }
 
@@ -105,15 +105,15 @@ void linkedList_countElements(LinkedList_t* list) {
 Returns the number of elements in the list after updating the count
 */
 int linkedList_numberOfElements(LinkedList_t* list) {
-    formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" checking list\n");
+    // formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" checking list\n");
     if (list == NULL) {
         formattedLog(stdlog, LOGTYPE_WARN, "Attempted to get null linked list element count\n");
         return -1;
     }
 
-    formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" call element count\n");
+    // formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" call element count\n");
     linkedList_countElements(list);
-    formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" return elements counted\n");
+    // formattedLog(debuglog, LOGTYPE_DEBUG, __FUNCTION__" return elements counted\n");
     return list->numberOfElements;
 }
 

@@ -26,7 +26,7 @@ SysFile_t* dF = NULL;
 #define decompLog(fmt, ...) if(decompLog) { fprintf(decompLog, fmt, __VA_ARGS__); } printf("[DECOMP] "); printf(fmt, __VA_ARGS__);
 #define decompL(fmt, ...) if(decompLog) { fprintf(decompLog, fmt, __VA_ARGS__); } printf(fmt, __VA_ARGS__);
 
-void decomp_addError(int index);
+void decomp_addError(int index, const char* errorComment);
 void decomp_printErrors();
 
 uint16_t prefix;
@@ -44,6 +44,7 @@ typedef struct DecompError {
     uint16_t operand;
     int index;
     char* humanString;
+    char* errorComment;
 } DecompError_t;
 
 LinkedList_t* listOfErrors = NULL;
@@ -77,10 +78,10 @@ void decomp_init(SysFile_t* file) {
     // Init the linked list
     listOfErrors = linkedList_init();
     if (listOfErrors == NULL) {
-        formattedLog(stdlog, LOGTYPE_ERROR, "Init LinkedList: [FAIL]\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Init Error Tracking: [FAIL]\n");
     }
     else {
-        decompLog("Init LinkedList: [OK]\n");
+        decompLog("Init Error Tracking: [OK]\n");
     }
 }
 
@@ -89,14 +90,14 @@ void decomp_finalise() {
 
     if (listOfErrors) {
         linkedList_destroy(listOfErrors);
-        decompLog("Free LinkedList: [OK]\n");
+        decompLog("Finalised Error Tracking: [OK]\n");
     }
     else {
-        decompLog("Free LinkedList: [FAIL]\n");
+        decompLog("Finalised Error Tracking: [FAIL]\n");
     }
 }
 
-void decomp_addError(int index) {
+void decomp_addError(int index, const char* errorComment) {
     if (listOfErrors == NULL) {
         formattedLog(stdlog, LOGTYPE_ERROR, "Attempted to add error during decompilation at index %04X, but failed\n", index);
         return;
@@ -115,6 +116,10 @@ void decomp_addError(int index) {
     err->operand = operand;
     err->prefix = prefix;
     err->index = index;
+    if (errorComment)
+        err->errorComment = errorComment;
+    else
+        err->errorComment = NULL;
 
     linkedList_push(listOfErrors, err, listOfErrors_DSIZE);
 }
@@ -138,7 +143,7 @@ void decomp_printErrors() {
             decompLog("NULL error\n");
         }
         else {
-            decompLog("Instruction = %04X %02X, Operand = %04X, Index = %04X\n", err->prefix, err->instruction, err->operand, err->index);
+            decompLog("[%04X] |%04X|%02X| $%04X, %s: %s\n", err->index, err->prefix, err->instruction, err->operand, err->humanString, err->errorComment);
 
             // Now free the error, as it wasn't freed when it was popped off the list
             free(err);
@@ -271,11 +276,11 @@ bool decomp_next() {
     if (instrByteLen == 0) {
         decompL("   [WARN: instrByteLen == 0] ");
         // Add this as an error
-        decomp_addError(startIndex);
+        decomp_addError(startIndex, "instrByteLen == 0");
     }
     if (instrHumanString == NULL) {
         decompL("   [WARN: instrHumanString == NULL] ");
-        decomp_addError(startIndex);
+        decomp_addError(startIndex, "instrHumanString == NULL");
     }
 
     decompL("\n");
@@ -283,7 +288,7 @@ bool decomp_next() {
     // Check for failure conditions
     if (funcPointer == NULL || instrByteLen < 0) {
         decompLog("Decompilation failed! (func pointer == NULL: %i, instrByteLen = %i)\n", funcPointer == NULL, instrByteLen);
-        decomp_addError(startIndex);
+        decomp_addError(startIndex, "instrByteLen < 0 || funcPointer == NULL");
         return false;
     }
     currentIndex += instrByteLen;
