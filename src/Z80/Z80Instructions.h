@@ -20,6 +20,11 @@ Z80Instructions.h : Instructions that the Z80 CPU can perform
 #include <stdbool.h>
 #include <stdint.h>
 
+#define PREFIX_BITS 0xCB
+#define PREFIX_EXX 0xED
+#define PREFIX_IX 0xDD
+#define PREFIX_IY 0xFD
+
 /* Struct defs */
 typedef struct Z80_Instr {
     char* string; // A pointer to the instruction string for human readability
@@ -40,14 +45,37 @@ typedef struct Z80_Instr {
     uint8_t numOperandsToRead; // Number of operands left to be read
 } Z80_Instr_t;
 
-extern const Z80_Instr_t instructions_nullInstruction;
+extern const Z80_Instr_t instructions_NULLInstr;
+
+/* Instruction execution return values. Less than 0 is a failure */
+#define INSTR_EXEC_FAILED -1
+#define INSTR_EXEC_NOTIMPL -2
+#define INSTR_EXEC_SUCCESS 0
+
+/* Instruction pointer tables */
+int instructions_NInstr();
+extern const int (*instructions_mainInstructionFuncs[0x100])(); // There are 256 opcodes in the primary table
+extern const int (*instructions_extendedInstructionFuncs[0x100])(); // PREFIX 0xED
+extern const int (*instructions_bitInstructionFuncs[0x100])(); // PREFIX 0xCB
+extern const int (*instructions_IXInstructionFuncs[0x100])(); // PREFIX 0xDD
+extern const int (*instructions_IXBitInstructionFuncs[0x100])(); // PREFIX 0xDDCB
+extern const int (*instructions_IYInstructionFuncs[0x100])(); // PREFIX 0xFD
+extern const int (*instructions_IYBitInstructionFuncs[0x100])(); // PREFIX 0xFDCB
 
 /* Human-readable strings for the opcodes table */
 extern const char* instructions_mainInstructionText[0x100]; // There are 256 opcodes in the primary table
-extern const char* instructions_extendedInstructionText[0xC0];
-extern const char* instructions_bitInstructionText[0x100];
+extern const char* instructions_extendedInstructionText[0x100]; // PREFIX 0xED
+extern const char* instructions_bitInstructionText[0x100]; // PREFIX 0xCB
+extern const char* instructions_IXInstructionText[0x100]; // PREFIX 0xDD
+extern const char* instructions_IXBitInstructionText[0x100]; // PREFIX 0xDDCB
+extern const char* instructions_IYInstructionText[0x100]; // PREFIX 0xFD
+extern const char* instructions_IYBitInstructionText[0x100]; // PREFIX 0xFDCB
 
-/* Instruction length and operand number information */
-#define PARAMS_LENGTH 0
-#define PARAMS_OPERANDN 1
-extern const int instructions_mainInstructionParams[0x100][2];
+/* Instruction length and operand number information. The table contains the length of the instruction in bytes. If > 1, num operands = (length in bytes - 1). If == -1, marks a prefix */
+extern const char instructions_mainInstructionParams[0x100]; // There are 256 opcodes in the primary table
+extern const char instructions_extendedInstructionParams[0x100]; // PREFIX 0xED
+extern const char instructions_bitInstructionParams[0x100]; // PREFIX 0xCB
+extern const char instructions_IXInstructionParams[0x100]; // PREFIX 0xDD
+extern const char instructions_IXBitInstructionParams[0x100]; // PREFIX 0xDDCB
+extern const char instructions_IYInstructionParams[0x100]; // PREFIX 0xFD
+extern const char instructions_IYBitInstructionParams[0x100]; // PREFIX 0xFDCB

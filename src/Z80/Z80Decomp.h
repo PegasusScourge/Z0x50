@@ -18,6 +18,8 @@ Z0xDecomp.h : Handles decompilation
 */
 
 #include "../SysIO/SysIO.h"
+#include <stdbool.h>
 
 void decomp_init(SysFile_t* file);
-void decomp_next();
+void decomp_finalise();
+bool decomp_next();

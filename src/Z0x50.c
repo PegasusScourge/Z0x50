@@ -55,7 +55,10 @@ int i = 0;
 void Z0_main() {
     switch (state) {
     case Z0State_DECOMPILE: // Process each instruction and report it to the decompilation log
-        decomp_next();
+        if (!decomp_next()) {
+            decomp_finalise();
+            state = Z0State_NONE;
+        }
         break;
 
     case Z0State_TEST:
@@ -77,6 +80,7 @@ void Z0_main() {
 
     default: // If we enter an unknown state, just terminate the program
         printf("ERROR: unknown Z0x50 state, exiting...\n");
+        state = Z0State_NONE;
         break;
     }
 }
@@ -137,7 +141,6 @@ void Z0_parseArguments() {
             state = Z0State_DECOMPILE;
             // Select the file to load from the next arg
             decompFile = argV[++i];
-            formattedLog(stdlog, LOGTYPE_MSG, "");
         }
         if (MATCHARG(i, "-T")) { // Test mode switch
             formattedLog(stdlog, LOGTYPE_MSG, "Set state: TEST\n");
@@ -177,7 +180,7 @@ int main(int argc, char* argv[]) {
     Z0_parseArguments();
 
     // Parse cfg
-    formattedLog(stdlog, LOGTYPE_MSG, "Parsing CFG:\n");
+    formattedLog(stdlog, LOGTYPE_MSG, "Parsing CFG\n");
     if (overrideCfg == NULL)
         overrideCfg = defaultCfg;
     cfgReader_readConfiguration(overrideCfg);

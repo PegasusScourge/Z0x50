@@ -76,13 +76,13 @@ void (*onFinishMCycle)() = NULL;
 ********************************************************************/
 
 void Z80Flags_setFlag(int f) {
-    AF.bytes[Z80DBLREG_LOWER] = AF.bytes[Z80DBLREG_LOWER] | (0b00000001 << f);
+    AF.bytes[DBLREG_LOWER] = AF.bytes[DBLREG_LOWER] | (0b00000001 << f);
 }
 void Z80Flags_clearFlag(int f) {
-    AF.bytes[Z80DBLREG_LOWER] = AF.bytes[Z80DBLREG_LOWER] & ~(0b00000001 << f);
+    AF.bytes[DBLREG_LOWER] = AF.bytes[DBLREG_LOWER] & ~(0b00000001 << f);
 }
 bool Z80Flags_readFlag(int f) {
-    return (AF.bytes[Z80DBLREG_LOWER] & (0b00000001 << f)) == 1;
+    return (AF.bytes[DBLREG_LOWER] & (0b00000001 << f)) == 1;
 }
 
 /********************************************************************
@@ -225,7 +225,7 @@ void Z80_M1T2Fall() {
 
     // No signals to manipulate
     // Take in a value from the data bus and store in cInstr
-    cInstr = instructions_nullInstruction; // Clear the instruction to null
+    cInstr = instructions_NULLInstr; // Clear the instruction to null
     cInstr.opcode = signal_dataBus; // HERE we take in the value
 
     // The next thing to do is perform a rudimentary decode on the next rising edge (M1T3). At the same time various signals toggle

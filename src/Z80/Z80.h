@@ -21,8 +21,8 @@ Z80.h : Z80 CPU component
 #include <stdbool.h>
 
 /* 16bit register definition */
-#define Z80DBLREG_UPPER 0
-#define Z80DBLREG_LOWER 1
+#define DBLREG_UPPER 0
+#define DBLREG_LOWER 1
 typedef union Z80_DblRegister {
     uint16_t v;
     uint8_t bytes[2];

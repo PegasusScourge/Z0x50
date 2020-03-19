@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CfgReader.c" />
+    <ClCompile Include="src\LinkedList.c" />
     <ClCompile Include="src\Z80\Z80Decomp.c" />
     <ClCompile Include="src\Memory\MemoryController.c" />
     <ClCompile Include="src\Memory\MemoryDevice.c" />
@@ -31,10 +32,13 @@
     <ClCompile Include="src\Z80\Z80.c" />
     <ClCompile Include="src\Z80\Z80Alu.c" />
     <ClCompile Include="src\Z80\Z80Instructions.c" />
+    <ClCompile Include="src\Z80\Z80InstructionsParams.c" />
+    <ClCompile Include="src\Z80\Z80InstructionsPointers.c" />
     <ClCompile Include="src\Z80\Z80InstructionsText.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CfgReader.h" />
+    <ClInclude Include="src\LinkedList.h" />
     <ClInclude Include="src\Z80\Z80Decomp.h" />
     <ClInclude Include="src\Memory\MemoryController.h" />
     <ClInclude Include="src\Memory\MemoryDevice.h" />
@@ -51,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Workspace\Debug.log" />
+    <Text Include="Workspace\decompilation.log" />
     <Text Include="Workspace\Z0x50.log" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -16,7 +16,7 @@ MemoryController.c : Memory controller system
 */
 
 #include "../Signals.h"
-#include "../Debug.h"
+#include "../SysIO/Log.h"
 
 #include "MemoryController.h"
 
@@ -50,7 +50,7 @@ Create a device
 void memoryController_createDevice(uint16_t startAdd, uint16_t size, bool writeable, bool readable) {
     // Check we don't want to create something useless
     if (size == 0 || (!readable && !writeable)) {
-        debug_printf("Attempted to create new device with useless qualities: size=%i, readable=%i, writeable=%i\n", size, readable, writeable);
+        formattedLog(debuglog, LOGTYPE_DEBUG, "Attempted to create new device with useless qualities: size=%i, readable=%i, writeable=%i\n", size, readable, writeable);
         return;
     }
     
@@ -66,7 +66,7 @@ void memoryController_createDevice(uint16_t startAdd, uint16_t size, bool writea
 
     if (!hasFreeSpace) {
         // ERROR
-        debug_printf("Unable to create new device: no free space\n");
+        formattedLog(debuglog, LOGTYPE_ERROR, "Unable to create new device: no free space\n");
         return;
     }
 
@@ -128,7 +128,7 @@ void memoryController_attemptRead(MemoryDevice_t* device) {
     int effectiveAddress = signal_addressBus - device->startOffset;
     if (effectiveAddress >= 0 && effectiveAddress < device->len) {
         // We are in range, put the value on the bus
-        debug_printf("[MEMORY] Device read @ %04X(dev_add=%04X) of value %04X\n", signal_addressBus, effectiveAddress, device->data[effectiveAddress]);
+        formattedLog(debuglog, LOGTYPE_DEBUG, "[MEMORY] Device read @ %04X(dev_add=%04X) of value %04X\n", signal_addressBus, effectiveAddress, device->data[effectiveAddress]);
         signal_dataBus = device->data[effectiveAddress];
     }
 }
@@ -151,7 +151,7 @@ void memoryController_attemptWrite(MemoryDevice_t* device) {
     int effectiveAddress = signal_addressBus - device->startOffset;
     if (effectiveAddress >= 0 && effectiveAddress < device->len) {
         // We are in range, store the value from the bus
-        debug_printf("[MEMORY] Device write @ %04X(dev_add=%04X) of value %04X\n", signal_addressBus, effectiveAddress, device->data[effectiveAddress]);
+        formattedLog(debuglog, LOGTYPE_DEBUG, "[MEMORY] Device write @ %04X(dev_add=%04X) of value %04X\n", signal_addressBus, effectiveAddress, device->data[effectiveAddress]);
         device->data[effectiveAddress] = signal_dataBus;
     }
 }

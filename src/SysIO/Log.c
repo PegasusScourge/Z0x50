@@ -30,13 +30,14 @@ void log_initLogFiles() {
 
 #ifdef _DEBUG
     debuglog = fopen(DBGLOG_FILE, "w");
-#else
-    debuglog = NULL;
-#endif
     if (debuglog == NULL) {
         // Throw an error
-        printf("Failed to create log file '" DBGLOG_FILE "'\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Failed to create log file '" DBGLOG_FILE "'\n");
     }
+#else
+    debuglog = NULL;
+    formattedLog(stdlog, LOGTYPE_MSG, "Debug log not created\n");
+#endif
 }
 
 void log_closeLogFiles() {
@@ -47,6 +48,10 @@ void log_closeLogFiles() {
 }
 
 void log_dumpHexToDebug(int elementsPerLine, SysFile_t* file) {
+    if (debuglog == NULL) {
+        return;
+    }
+
     int cX = 0;
     int i = 0;
     unsigned char v;

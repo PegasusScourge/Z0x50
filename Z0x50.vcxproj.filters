@@ -72,6 +72,15 @@
     <ClCompile Include="src\Z80\Z80Instructions.c">
       <Filter>Source Files\Z80</Filter>
     </ClCompile>
+    <ClCompile Include="src\Z80\Z80InstructionsParams.c">
+      <Filter>Source Files\Z80</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Z80\Z80InstructionsPointers.c">
+      <Filter>Source Files\Z80</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LinkedList.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Z0x50.h">
@@ -116,12 +125,18 @@
     <ClInclude Include="src\Z80\Z80Decomp.h">
       <Filter>Header Files\Z80</Filter>
     </ClInclude>
+    <ClInclude Include="src\LinkedList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Workspace\Debug.log">
       <Filter>Log Files</Filter>
     </Text>
     <Text Include="Workspace\Z0x50.log">
+      <Filter>Log Files</Filter>
+    </Text>
+    <Text Include="Workspace\decompilation.log">
       <Filter>Log Files</Filter>
     </Text>
   </ItemGroup>
