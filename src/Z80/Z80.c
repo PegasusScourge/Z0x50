@@ -146,7 +146,7 @@ void Z80_signalCLCKListener(bool rising) {
     }
     else if (rising && onFinishMCycle == NULL) {
         // We have no function to complete but we need to! Fail the processor here
-        formattedLog(stdlog, LOGTYPE_ERROR, "Processor microstate execution has failed: no onRising or onFinishMCycle function to execute!");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Processor microstate execution has failed: no onRising or onFinishMCycle function to execute!\n");
         wait = true; // Force a wait condition
     }
 }
@@ -441,7 +441,7 @@ void Z80_prepReadOperands() {
     }
     else {
         // We have no more operands to read, move to execution. Somehow we ended up here? Maybe detected 3 operands?????
-        formattedLog(stdlog, LOGTYPE_WARN, __FUNCTION__" attempted operand read, INVALID: cInstr.numOperandsToRead = %i. Performing execution of instruction anyway", cInstr.numOperandsToRead);
+        formattedLog(stdlog, LOGTYPE_WARN, __FUNCTION__" attempted operand read, INVALID: cInstr.numOperandsToRead = %i. Performing execution of instruction anyway\n", cInstr.numOperandsToRead);
         onFinishMCycle = &Z80_executeInstruction;
         onNextRisingCLCK = NULL; // we don't need to read anything, so cancel the proceedure here
     }

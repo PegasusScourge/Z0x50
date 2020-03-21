@@ -201,6 +201,9 @@ int main(int argc, char* argv[]) {
         decompilationFp = NULL;
     }
 
+    // Clean up the settings
+    cfgReader_cleanSettings();
+
     // Close
     log_closeLogFiles();
 }

@@ -23,7 +23,10 @@ CfgReader.h : Reads the CFG file and exposes the settings
 
 typedef struct Setting {
     char* name;
-    int value;
+    struct SettingValue {
+        int _int;
+        char* _str;
+    } value;
 } Setting_t;
 
 /********************************************************************
@@ -34,6 +37,7 @@ typedef struct Setting {
 
 Setting_t* cfgReader_createSetting(const char* name);
 void cfgReader_destroySetting(Setting_t* s);
+void cfgReader_cleanSettings();
 
 /********************************************************************
 

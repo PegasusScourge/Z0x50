@@ -45,14 +45,19 @@ Setting_t* cfgReader_createSetting(const char* name) {
         return NULL;
     }
 
-    s->name = calloc(strlen(name), sizeof(char));
+    int nameLen = (int)strlen(name) + 1;
+    s->name = calloc(nameLen, sizeof(char));
     if (s->name == NULL) {
         formattedLog(stdlog, LOGTYPE_ERROR, "Unable to create Setting_t: can't allocate memory for name str\n");
         return NULL;
     }
 
     // Move the name across
-    strcpy(s->name, name);
+    memcpy(s->name, name, nameLen);
+    *(s->name + nameLen - 1) = '\0';
+
+    s->value._int = 0;
+    s->value._str = NULL;
 
     return s;
 }
@@ -66,6 +71,13 @@ void cfgReader_destroySetting(Setting_t* s) {
         return;
     }
 
+    directLog(debuglog, "Clean setting: ");
+    directLog(debuglog, "name='%s' ", s->name);
+    if (s->value._str != NULL) {
+        directLog(debuglog, "_int=%i, _str='%s' ", s->value._int, s->value._str);
+        free(s->value._str);
+    }
+
     // Attempt to free the name string
     if (s->name != NULL) {
         free(s->name);
@@ -73,6 +85,19 @@ void cfgReader_destroySetting(Setting_t* s) {
 
     // Free the setting
     free(s);
+    directLog(debuglog, "[OK]\n");
+}
+
+/*
+Cleans up the settings before we exit
+*/
+void cfgReader_cleanSettings() {
+    formattedLog(debuglog, LOGTYPE_DEBUG, "Cleaning up settings...\n");
+    for (int i = 0; i < MAX_NUM_SETTINGS; i++) {
+        if (settings[i] != NULL) {
+            cfgReader_destroySetting(settings[i]);
+        }
+    }
 }
 
 /********************************************************************
@@ -92,7 +117,7 @@ int cfgReader_querySettingValue(const char* n) {
                 // It has a name!
                 if (strcmp(n, settings[i]->name) == 0) {
                     // It matches!
-                    return settings[i]->value;
+                    return settings[i]->value._int;
                 }
             }
         }
@@ -227,7 +252,7 @@ void cfgReader_processLine(const char* ln) {
     char token[2] = "=";
 
     // Fill the buff
-    strcpy(buff, ln);
+    memcpy(buff, ln, buffLen);
     buff[buffLen - 1] = '\0'; // Make sure we have a null terminator
 
     // FROM THIS POINT buff WILL CHANGE VALUE, FREE MEMORY WITH buffBase
@@ -260,16 +285,28 @@ void cfgReader_processLine(const char* ln) {
         if (checkSplit("testLine", 2)) {
             formattedLog(debuglog, LOGTYPE_DEBUG, "testLine says: '%s'\n", splits[1]);
         }
+        else if (splits[0][0] == '#' || splits[0][0] == '!') {
+            formattedLog(debuglog, LOGTYPE_DEBUG, "Comment line: %s\n", ln);
+        }
         else if(splitsDetected == 2) {
             // If we have 2 splits, just add the setting
             s = cfgReader_createSetting(splits[0]);
-            s->value = atoi(splits[1]);
+            s->value._int = atoi(splits[1]);
+
+            // Add the setting string value
+            directLog(debuglog, "Setting string split[1] len = %i\n", (int)strlen(splits[1]));
+            int bLen = (int)strlen(splits[1]) + 1;
+            s->value._str = calloc(bLen, sizeof(char));
+            if (s->value._str != NULL) {
+                memcpy(s->value._str, splits[1], bLen);
+                *(s->value._str + bLen - 1) = '\0';
+            }
         }
 
         // If the setting isn't NULL, add it to the list
         if (s != NULL) {
             settings[currentSetting] = s;
-            formattedLog(debuglog, LOGTYPE_DEBUG, "Added setting '%s' at index %i\n", s->name, currentSetting);
+            formattedLog(debuglog, LOGTYPE_DEBUG, "Added setting '%s' at index %i, value _int=%i _str='%s'\n", s->name, currentSetting, s->value._int, s->value._str);
             currentSetting++;
         }
     }
