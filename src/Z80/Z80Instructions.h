@@ -24,6 +24,8 @@ Z80Instructions.h : Instructions that the Z80 CPU can perform
 #define PREFIX_EXX 0xED
 #define PREFIX_IX 0xDD
 #define PREFIX_IY 0xFD
+#define PREFIX_IX_BITS 0xDDCB
+#define PREFIX_IY_BITS 0xFDCB
 
 /* Struct defs */
 typedef struct Z80_Instr {
@@ -40,9 +42,12 @@ typedef struct Z80_Instr {
 
     uint8_t operand0; // In a two byte, represents the second byte read. Otherwise is first and only byte read.
     uint8_t operand1; // In a two byte, is first byte read. Otherwise not needed.
+    uint16_t prefix; // The prefix of the function
 
     uint8_t numOperands; // Number of operands the instruction has after the opcode
     uint8_t numOperandsToRead; // Number of operands left to be read
+
+    bool detectedPrefix;
 } Z80_Instr_t;
 
 extern const Z80_Instr_t instructions_NULLInstr;

@@ -192,11 +192,11 @@ void decomp_deriveInstructionInformation() {
             instrHumanString = instructions_IXInstructionText[instruction];
             funcPointer = instructions_IXInstructionFuncs[instruction];
             break;
-        case (PREFIX_IX << 8) | PREFIX_BITS:
+        case PREFIX_IX_BITS:
             decompLog("Unhandled prefix code: %04X\n", prefix);
             instrByteLen = -2;
             break;
-        case (PREFIX_IY << 8) | PREFIX_BITS:
+        case PREFIX_IY_BITS:
             instrByteLen = instructions_IYBitInstructionParams[instruction];
             instrNumOperands = instrByteLen > 1 ? instrByteLen - 3 : 0;
             instrHumanString = instructions_IYBitInstructionText[instruction];

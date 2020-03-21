@@ -16,7 +16,7 @@ Z80Alu.c : Z80 CPU ALU component
 */
 
 #include "Z80Alu.h"
-#include "Z80FlagAccess.h"
+#include "Z80Flags.h"
 
 /* Internal ALU values to simplify C variable handling */
 union resultStore {

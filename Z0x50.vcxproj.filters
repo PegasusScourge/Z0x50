@@ -95,9 +95,6 @@
     <ClInclude Include="src\Z80\Z80Alu.h">
       <Filter>Header Files\Z80</Filter>
     </ClInclude>
-    <ClInclude Include="src\Z80\Z80FlagAccess.h">
-      <Filter>Header Files\Z80</Filter>
-    </ClInclude>
     <ClInclude Include="src\Z80\Z80InstrTypes.h">
       <Filter>Header Files\Z80</Filter>
     </ClInclude>
@@ -127,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="src\LinkedList.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Z80\Z80Flags.h">
+      <Filter>Header Files\Z80</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

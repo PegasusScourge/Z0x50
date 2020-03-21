@@ -21,12 +21,15 @@ Z80.h : Z80 CPU component
 #include <stdbool.h>
 
 /* 16bit register definition */
-#define DBLREG_UPPER 0
-#define DBLREG_LOWER 1
+#define UPPER 0
+#define LOWER 1
 typedef union Z80_DblRegister {
     uint16_t v;
     uint8_t bytes[2];
 } Z80_DblRegister;
+
+/* Z80 Internal State Variables */
+extern uint8_t microcodeState;
 
 /********************************************************************
 
@@ -52,6 +55,7 @@ void Z80_signalWAITListener(bool rising);
 
 ********************************************************************/
 
+#define Z80_fetchCycleStart Z80_M1T1Rise
 void Z80_M1T1Rise();
 void Z80_M1T1Fall();
 void Z80_M1T2Fall();
@@ -62,9 +66,11 @@ void Z80_M1T4Fall();
 /********************************************************************
 
     Z80 Memory Read Functions
+    Reads to memory location identified by 'addressBusLatch' and places value where 'internalDataBus' points
 
 ********************************************************************/
 
+#define Z80_memReadCycleStart Z80_memReadT1Rise
 void Z80_memReadT1Rise();
 void Z80_memReadT1Fall();
 void Z80_memReadT2Rise();
@@ -73,9 +79,11 @@ void Z80_memReadT2Fall();
 /********************************************************************
 
     Z80 Memory Write Functions
+    Writes to memory location identified by 'addressBusLatch' and retrieves value pointed to by 'internalDataBus'
 
 ********************************************************************/
 
+#define Z80_memWriteCycleStart Z80_memWriteT1Rise
 void Z80_memWriteT1Rise();
 void Z80_memWriteT1Fall();
 void Z80_memWriteT2Fall();
@@ -88,6 +96,15 @@ void Z80_memWriteT3Fall();
 ********************************************************************/
 
 void Z80_prepReadOperands();
+
+/********************************************************************
+
+    Z80 Prefix Handling Functions
+
+********************************************************************/
+
+void Z80_prepPrefixedInstructionRead();
+void Z80_finalisePrefixedInstructionRead();
 
 /********************************************************************
 
@@ -104,3 +121,4 @@ void Z80_executeInstruction();
 ********************************************************************/
 
 void Z80_decode();
+void Z80_decodeBranchDecision();

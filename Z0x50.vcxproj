@@ -49,7 +49,7 @@
     <ClInclude Include="src\Z0x50.h" />
     <ClInclude Include="src\Z80\Z80.h" />
     <ClInclude Include="src\Z80\Z80Alu.h" />
-    <ClInclude Include="src\Z80\Z80FlagAccess.h" />
+    <ClInclude Include="src\Z80\Z80Flags.h" />
     <ClInclude Include="src\Z80\Z80InstrTypes.h" />
     <ClInclude Include="src\Z80\Z80Instructions.h" />
   </ItemGroup>

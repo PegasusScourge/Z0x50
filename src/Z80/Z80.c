@@ -16,7 +16,7 @@ Z80.c : Z80 CPU component
 */
 
 #include "Z80.h"
-#include "Z80FlagAccess.h"
+#include "Z80Flags.h"
 #include "Z80Instructions.h"
 
 #include "../Signals.h"
@@ -53,14 +53,12 @@ Z80_Instr_t cInstr; // The current instruction we are processing
 /* Z80 Internal State Variables */
 enum Z80InternalStateEnum { Z80State_Fetch, Z80State_Decode, Z80State_Execute };
 uint8_t internalState = Z80State_Fetch; // The broad state we are in
+bool wait = false; // If true, the CPU stops at its current step and doesn't advance
+uint8_t microcodeState = 0; // Used by instruction functions to control their internal affairs
 
-// uint8_t TNumber = 0; // Each T represents a clock cycle within a machine cycle
-// uint8_t MNumber = 0; // Each M represents a machine cycle in an instruction cycle.
-
+/* Data Movement Variables */
 uint16_t addressBusLatch = 0; // This value is pushed to the address bus during the start of memory read and write cycles. Needs to be preloaded
 uint8_t* internalDataBus = NULL; // This is a pointer to where the data we read/write goes to/comes from when doing memory read and write cycles
-
-bool wait = false; // If true, the CPU stops at its current step and doesn't advance
 
 /* Clock timing pointers */
 void (*onNextRisingCLCK)() = NULL; // If non-NULL, called on next rising clock edge. Set to NULL before call
@@ -76,13 +74,13 @@ void (*onFinishMCycle)() = NULL;
 ********************************************************************/
 
 void Z80Flags_setFlag(int f) {
-    AF.bytes[DBLREG_LOWER] = AF.bytes[DBLREG_LOWER] | (0b00000001 << f);
+    AF.bytes[LOWER] = AF.bytes[LOWER] | (0b00000001 << f);
 }
 void Z80Flags_clearFlag(int f) {
-    AF.bytes[DBLREG_LOWER] = AF.bytes[DBLREG_LOWER] & ~(0b00000001 << f);
+    AF.bytes[LOWER] = AF.bytes[LOWER] & ~(0b00000001 << f);
 }
 bool Z80Flags_readFlag(int f) {
-    return (AF.bytes[DBLREG_LOWER] & (0b00000001 << f)) == 1;
+    return (AF.bytes[LOWER] & (0b00000001 << f)) == 1;
 }
 
 /********************************************************************
@@ -93,9 +91,6 @@ bool Z80Flags_readFlag(int f) {
 
 // Init the Z80 chip
 void Z80_init() {
-    // Zeroth order: Set to a fetch state and reset T and M numbers
-    // TNumber = 0;
-    // MNumber = 0;
     internalState = Z80State_Fetch;
 
     // Firstly connect the signals
@@ -149,6 +144,11 @@ void Z80_signalCLCKListener(bool rising) {
         onFinishMCycle = NULL; // NULL out the pointer
         func();
     }
+    else if (rising && onFinishMCycle == NULL) {
+        // We have no function to complete but we need to! Fail the processor here
+        formattedLog(stdlog, LOGTYPE_ERROR, "Processor microstate execution has failed: no onRising or onFinishMCycle function to execute!");
+        wait = true; // Force a wait condition
+    }
 }
 
 void Z80_signalWAITListener(bool rising) {
@@ -167,7 +167,6 @@ Activates on the rising edge of M1T1.
 Place PC on the address bus, set MREQ, RD and RFSH high, set M1 low
 This allows the external circuitry to prepare to recieve the memory location we want to read from
 */
-#define Z80_fetchCycleStart Z80_M1T1Rise
 void Z80_M1T1Rise() {
     if (internalState != Z80State_Fetch) {
         // We require to match the fetch state!
@@ -254,6 +253,7 @@ void Z80_M1T3Rise() {
 
     // Do a decode
     internalState = Z80State_Decode;
+    formattedLog(debuglog, LOGTYPE_DEBUG, "[DECODE]\n");
     Z80_decode();
 
     // Setup the next function. The falling edge of M1T3 requires a MREQ fall and is where we decide the course of action: execution or memory read/write
@@ -272,14 +272,8 @@ void Z80_M1T3Fall() {
         return; // For now just return. This will halt the processor
     }
 
-    // If we have no operands, we can just do an execution
-    if (cInstr.numOperands == 0) {
-        onNextRisingCLCK = &Z80_executeInstruction;
-    }
-    else {
-        // We need to read operands from memory to continue the execution, so we shall set up the pathway
-        onNextRisingCLCK = &Z80_prepReadOperands; // this is just a dummy function that leads into the real pathway after M1 has elapsed
-    }
+    // Decide
+    Z80_decodeBranchDecision();
 
     // On the next falling edge we need to raise MREQ regardless of what we do here
     onNextFallingCLCK = &Z80_M1T4Fall;
@@ -298,6 +292,7 @@ void Z80_M1T4Fall() {
 /********************************************************************
 
     Z80 Memory Read Functions
+    Reads to memory location identified by 'addressBusLatch' and places value where 'internalDataBus' points
 
 ********************************************************************/
 
@@ -305,7 +300,6 @@ void Z80_M1T4Fall() {
 Activates on the rising edge of MREADT1
 Puts addressBusLatch on the address bus
 */
-#define Z80_memReadCycleStart Z80_memReadT1Rise
 void Z80_memReadT1Rise() {
     printf("[MEM READ]\n");
     // We are doing a memory read cycle, so irrespective of state we continue
@@ -360,6 +354,7 @@ void Z80_memReadT2Fall() {
 /********************************************************************
 
     Z80 Memory Write Functions
+    Writes to memory location identified by 'addressBusLatch' and retrieves value pointed to by 'internalDataBus'
 
 ********************************************************************/
 
@@ -367,7 +362,6 @@ void Z80_memReadT2Fall() {
 Activates on the rising edge of MWRITET1
 Puts addressBusLatch on the address bus
 */
-#define Z80_memWriteCycleStart Z80_memWriteT1Rise
 void Z80_memWriteT1Rise() {
     printf("[MEM WRITE]\n");
     // We are doing a memory write cycle, so irrespective of state we continue
@@ -447,12 +441,49 @@ void Z80_prepReadOperands() {
     }
     else {
         // We have no more operands to read, move to execution. Somehow we ended up here? Maybe detected 3 operands?????
+        formattedLog(stdlog, LOGTYPE_WARN, __FUNCTION__" attempted operand read, INVALID: cInstr.numOperandsToRead = %i. Performing execution of instruction anyway", cInstr.numOperandsToRead);
         onFinishMCycle = &Z80_executeInstruction;
-        onNextRisingCLCK = NULL; // we don't need to read anything
+        onNextRisingCLCK = NULL; // we don't need to read anything, so cancel the proceedure here
     }
 
     // Decrement operands to read
     cInstr.numOperandsToRead--;
+}
+
+/********************************************************************
+
+    Z80 Prefix Handling Functions
+
+********************************************************************/
+
+/*
+Similar to if we had encountered an operand to read, we have encountered a prefix and thus need to get the instruction in the next position in memory
+*/
+void Z80_prepPrefixedInstructionRead() {
+    // We must transfer the "opcode" into our prefix buffer
+    cInstr.prefix = (cInstr.prefix << 8) | cInstr.opcode;
+
+    // Now we must set up the memory read cycle to read into the opcode location by pointing the internalDataBus at it
+    internalDataBus = &cInstr.opcode;
+    // Now set up the return function
+    onFinishMCycle = &Z80_finalisePrefixedInstructionRead;
+    
+    // The next rising edge needs to be a memory read cycle
+    onNextRisingCLCK = &Z80_memReadCycleStart;
+}
+
+/*
+This function is analagous to Z80_M1T3Rise and Z80_M1T3Fall, where we decide what to do. 
+This takes place on a rising edge though, so we must in actuality EXECUTE the next function, not point to it like in others. <----- we don't do this for now, do we need to?
+*/
+void Z80_finalisePrefixedInstructionRead() {
+    internalState = Z80State_Decode;
+    formattedLog(debuglog, LOGTYPE_DEBUG, "[PREFIXED DECODE]\n");
+    // Perform the decode
+    Z80_decode();
+
+    // Perform the branch decision
+    Z80_decodeBranchDecision();
 }
 
 /********************************************************************
@@ -499,7 +530,62 @@ void Z80_decode() {
     cInstr.q = cInstr.y % 2;
 
     // Now we retrieve the human-readable pointer
-    cInstr.string = instructions_mainInstructionText[cInstr.opcode];
-    formattedLog(debuglog, LOGTYPE_DEBUG, "[DECODE]\n");
-    formattedLog(debuglog, LOGTYPE_DEBUG, "opcode %s (pc: %04X, %02X)\n", cInstr.string, PC.v, cInstr.opcode);
+    switch (cInstr.prefix) {
+    case PREFIX_BITS:
+        cInstr.string = instructions_bitInstructionText[cInstr.opcode];
+        break;
+    case PREFIX_EXX:
+        cInstr.string = instructions_extendedInstructionText[cInstr.opcode];
+        break;
+    case PREFIX_IX:
+        cInstr.string = instructions_IXInstructionText[cInstr.opcode];
+        break;
+    case PREFIX_IY:
+        cInstr.string = instructions_IYInstructionText[cInstr.opcode];
+        break;
+    case PREFIX_IX_BITS:
+        cInstr.string = instructions_IXBitInstructionText[cInstr.opcode];
+        break;
+    case PREFIX_IY_BITS:
+        cInstr.string = instructions_IYBitInstructionText[cInstr.opcode];
+        break;
+    default:
+        cInstr.string = instructions_mainInstructionText[cInstr.opcode];
+        break;
+    }
+
+    // Determine if the opcode is a prefix
+    switch (cInstr.opcode) {
+    case PREFIX_BITS:
+    case PREFIX_EXX:
+    case PREFIX_IX:
+    case PREFIX_IY:
+        cInstr.detectedPrefix = true;
+        formattedLog(debuglog, LOGTYPE_DEBUG, "prefix %s (pc: %04X, %04X %02X)\n", cInstr.string, PC.v, cInstr.prefix, cInstr.opcode);
+        break;
+
+    default:
+        cInstr.detectedPrefix = false;
+        formattedLog(debuglog, LOGTYPE_DEBUG, "opcode %s (pc: %04X, %04X %02X)\n", cInstr.string, PC.v, cInstr.prefix, cInstr.opcode);
+        break;
+    }
+}
+
+/*
+We decide here if we need to execute the instruction, handle a prefix or read memory
+*/
+void Z80_decodeBranchDecision() {
+    // We have a prefix code, so we need to handle it
+    if (cInstr.detectedPrefix) {
+        // We need to move to a prefix read branch
+        onNextRisingCLCK = &Z80_prepPrefixedInstructionRead;
+    }
+    // If we have no operands, we can just do an execution
+    else if (cInstr.numOperands == 0) {
+        onNextRisingCLCK = &Z80_executeInstruction;
+    }
+    else {
+        // We need to read operands from memory to continue the execution, so we shall set up the pathway
+        onNextRisingCLCK = &Z80_prepReadOperands; // this is just a dummy function that leads into the real pathway after M1 has elapsed
+    }
 }
