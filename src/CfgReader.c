@@ -180,7 +180,7 @@ void cfgReader_processConfiguration(const char* data, const long int size) {
         exit(-1);
     }
     formattedLog(debuglog, LOGTYPE_DEBUG, "[CFG PROCESS] Allocated buffer of %i bytes\n", size);
-    strcpy(buffer, data);
+    memcpy(buffer, data, size);
     
     // Check that the last character is a '\0'
     if (buffer[size - 1] != '\0') {
