@@ -19,6 +19,8 @@ MemoryController.h : Memory controller system
 
 #include "MemoryDevice.h"
 
+#define MAX_NUMBER_OF_MEMORIES 32
+
 /********************************************************************
 
     MemoryController init functions

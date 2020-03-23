@@ -29,7 +29,7 @@ Z80Instructions.h : Instructions that the Z80 CPU can perform
 
 /* Struct defs */
 typedef struct Z80_Instr {
-    char* string; // A pointer to the instruction string for human readability
+    const char* string; // A pointer to the instruction string for human readability
     unsigned int type; // Instruction type reference for the Z80 etc
 
     /* Breakdown switch values of the opcode */

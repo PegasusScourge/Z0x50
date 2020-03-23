@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\CfgReader.c" />
     <ClCompile Include="src\LinkedList.c" />
+    <ClCompile Include="src\Oscillator.c" />
     <ClCompile Include="src\Z80\Z80Decomp.c" />
     <ClCompile Include="src\Memory\MemoryController.c" />
     <ClCompile Include="src\Memory\MemoryDevice.c" />
@@ -39,6 +40,7 @@
   <ItemGroup>
     <ClInclude Include="src\CfgReader.h" />
     <ClInclude Include="src\LinkedList.h" />
+    <ClInclude Include="src\Oscillator.h" />
     <ClInclude Include="src\Z80\Z80Decomp.h" />
     <ClInclude Include="src\Memory\MemoryController.h" />
     <ClInclude Include="src\Memory\MemoryDevice.h" />
@@ -148,10 +150,13 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>CompileAsC</CompileAs>
+      <AdditionalIncludeDirectories>C:\Users\Matt\OneDrive\Dropbox-Overflow\Programming\C\Z0x50\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\Matt\OneDrive\Dropbox-Overflow\Programming\C\Z0x50\lib\msvc;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>csfml-audio.lib;csfml-window.lib;csfml-system.lib;csfml-graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

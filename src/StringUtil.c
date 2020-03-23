@@ -8,7 +8,6 @@ Created by Matthew Clarke
 */
 
 #include "StringUtil.h"
-#include <stdlib.h>
 #include <string.h>
 
 /********************************************************************
@@ -60,4 +59,23 @@ Returns the trimmed string
 */
 char* sutil_trim(char* str, const char* seps) {
     return sutil_ltrim(sutil_rtrim(str, seps), seps);
+}
+
+int sutil_split(char* b, size_t bLen, char** splits, size_t splitsLen, const char* token) {
+    // Prepare the variables to capture the lines
+    char* line;
+    int linesDetected = 0;
+
+    // Get the first line
+    line = strtok(b, token);
+    while (line != NULL && linesDetected < splitsLen) {
+        // Save the current pointer
+        splits[linesDetected] = sutil_trim(line, NULL);
+
+        // Get the next line
+        line = strtok(NULL, token);
+        linesDetected++;
+    }
+
+    return linesDetected;
 }

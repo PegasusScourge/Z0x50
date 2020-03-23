@@ -29,7 +29,11 @@ typedef union Z80_DblRegister {
 } Z80_DblRegister;
 
 /* Z80 Internal State Variables */
-extern uint8_t microcodeState;
+extern int microcodeState;
+
+/* State */
+enum Z80InternalStateEnum { Z80State_Fetch, Z80State_Decode, Z80State_Execute, Z80State_Failure };
+int Z80_state();
 
 /********************************************************************
 

@@ -26,6 +26,8 @@ Can be run as a Sinclair ZX Spectrum or used as a basis for a larger project.
 #include "SysIO/Log.h"
 #include "SysIO/SysIO.h"
 #include "Z80/Z80Decomp.h"
+#include "Oscillator.h"
+#include "StringUtil.h"
 
 #define MATCHARG(a, b) strcmp(argV[a], b) == 0
 
@@ -49,6 +51,7 @@ int argC;
 /* RAND */
 bool clkV = false;
 int i = 0;
+unsigned long long numOscillations = 0;
 
 /* MAIN FUNCTION */
 
@@ -62,8 +65,8 @@ void Z0_main() {
         break;
 
     case Z0State_TEST:
-        // Rotate the clock signal 200 times
-        if(i < 200) {
+        // Rotate the clock signal 50 times
+        if(i < 50) {
             clkV = !clkV;
             // printf("Clock now %i, iteration %i\n", clkV, i);
             if (clkV)
@@ -74,6 +77,24 @@ void Z0_main() {
         }
         else {
             formattedLog(stdlog, LOGTYPE_MSG, "Done!\n");
+            state = Z0State_NONE;
+        }
+        break;
+
+    case Z0State_NORMAL:
+        if (numOscillations > 1000) {
+            formattedLog(stdlog, LOGTYPE_MSG, "Z80 has reached termination\n");
+            state = Z0State_NONE;
+            break;
+        }
+
+        if (Z80_state() != Z80State_Failure) {
+            // Ask the oscillator to function
+            if(oscillator_tick())
+                numOscillations++;
+        }
+        else {
+            formattedLog(stdlog, LOGTYPE_MSG, "Z80 has issued a termination request\n");
             state = Z0State_NONE;
         }
         break;
@@ -93,6 +114,9 @@ void Z0_initSystem() {
     memoryController_init();
     // Init the Z80
     Z80_init();
+
+    // Init the oscillator
+    oscillator_init();
 
     // Do a switch for init here
     switch (state) {
@@ -122,9 +146,121 @@ void Z0_initSystem() {
         decomp_init(decompilationFp);
         break;
 
+    case Z0State_NORMAL:
+        // Load memory devices here
+        Z0_loadMemoryDevices();
+
+        // Load the bios ROM
+        if (!Z0_loadBiosROM())
+            break;
+        // state = Z0State_NONE;
+        break;
+
     default:
         // Do nothing
         break;
+    }
+}
+
+bool Z0_loadBiosROM() {
+    // Load the ROM file specified by the settings
+        // This is a required step: we fail if it can't be done
+    if (!cfgReader_querySettingExist("bios_rom")) {
+        formattedLog(stdlog, LOGTYPE_ERROR, "Cfg file missing 'bios_rom' setting, unable to load\n");
+        state = Z0State_NONE;
+        return false;
+    }
+    char* biosRomFilePath = cfgReader_querySettingValueStr("bios_rom");
+    SysFile_t* biosRomFile = sysIO_openFile(biosRomFilePath);
+    if (biosRomFile == NULL) {
+        formattedLog(stdlog, LOGTYPE_ERROR, "BIOS ROM file error: unable to find file '%s'\n", biosRomFilePath);
+        state = Z0State_NONE;
+        return false;
+    }
+
+    // Cache the file
+    sysIO_cacheFile(biosRomFile);
+    if (!biosRomFile->cached) {
+        formattedLog(stdlog, LOGTYPE_ERROR, "BIOS ROM file '%s' could not be cached\n", biosRomFilePath);
+        state = Z0State_NONE;
+        return false;
+    }
+
+    // Load the file into memory now, at position 0 by default
+    uint16_t romAddress = 0;
+    formattedLog(stdlog, LOGTYPE_MSG, "Loading BIOS ROM file '%s' into address ", biosRomFilePath);
+    if (cfgReader_querySettingExist("bios_address")) {
+        romAddress = cfgReader_querySettingValueInt("bios_address");
+    }
+    directLog(stdlog, "%04X\n", romAddress);
+
+    // We need to drive the signal_addressBus and signal_dataBus with the appropriate values as we scan through the data
+    // To allow writing, we need to put signal_MREQ and signal_WR high to make the controller write on the memoryController_onCLCK(true) trigger
+    signals_raiseSignal(&signal_MREQ);
+    signals_raiseSignal(&signal_WR);
+
+    // Do the writing
+    formattedLog(debuglog, LOGTYPE_DEBUG, "Writing BIOS ROM file to memory. Bytes to write: %04X\n", biosRomFile->size);
+    formattedLog(stdlog, LOGTYPE_MSG, "Writing BIOS ROM file to memory. Bytes to write: %04X\n", biosRomFile->size);
+
+    signal_addressBus = romAddress;
+    for (uint16_t i = 0; i < biosRomFile->size; i++) {
+        // Put the data on the bus
+        signal_addressBus = i + romAddress;
+        signal_dataBus = biosRomFile->data[i];
+
+        // Trigger the write
+        memoryController_onCLCK(true);
+    }
+    directLog(debuglog, "\n");
+    formattedLog(debuglog, LOGTYPE_DEBUG, "BIOS ROM file write complete\n");
+    formattedLog(stdlog, LOGTYPE_MSG, "BIOS ROM file write complete\n");
+
+    // Clean up the signals
+    signals_dropSignal(&signal_MREQ);
+    signals_dropSignal(&signal_WR);
+
+    sysIO_closeFile(biosRomFile);
+    return true;
+}
+
+void Z0_loadMemoryDevices() {
+    formattedLog(debuglog, LOGTYPE_DEBUG, "Memory device configuation\n");
+
+    for (int i = 0; i < MAX_NUMBER_OF_MEMORIES; i++) {
+        // Generate the matcher string we look for as a setting
+        char prefix[50] = "memdev";
+        char* matcher = prefix;
+        char number[3];
+        _itoa(i, number, 10);
+        strcat(matcher, number);
+        directLog(debuglog, "Looking for memory device '%s' definition...\n", matcher);
+
+        if (cfgReader_querySettingExist(matcher)) {
+            // We have the definition, but we must check it to be sure
+            char* rawVal = cfgReader_querySettingValueStr(matcher);
+            int buffLen = (int)strlen(rawVal) + 1;
+            char* buff = calloc(buffLen, sizeof(char));
+            if (buff == NULL) {
+                // We fail!
+                formattedLog(stdlog, LOGTYPE_WARN, "Detected setting for '%s' but failed to allocate memory for buffer\n", matcher);
+            }
+
+            memcpy(buff, rawVal, buffLen); // Copy the null char too
+            char* splits[8];
+            int splitsMade = sutil_split(buff, buffLen, splits, 8, ",");
+            if (splitsMade == 4) {
+                // We are valid!
+                formattedLog(stdlog, LOGTYPE_MSG, "Detected setting for '%s'\n", matcher);
+                // Time to configure the memory device
+                memoryController_createDevice(atoi(splits[0]), atoi(splits[1]), atoi(splits[2]), atoi(splits[3]));
+            }
+            else {
+                formattedLog(stdlog, LOGTYPE_WARN, "Detected setting for '%s', but it was of the incorrect format. Had %i elements.\n", matcher, splitsMade);
+            }
+
+            free(buff);
+        }
     }
 }
 
@@ -177,6 +313,7 @@ int main(int argc, char* argv[]) {
 
     formattedLog(stdlog, LOGTYPE_MSG, "Parsing command line arguments\n");
     // Call the parsing function, passing the arguments we recieved
+    state = Z0State_NORMAL;
     Z0_parseArguments();
 
     // Parse cfg

@@ -21,7 +21,6 @@ MemoryController.c : Memory controller system
 #include "MemoryController.h"
 
 /* Memories */
-#define MAX_NUMBER_OF_MEMORIES 32
 MemoryDevice_t* memories[MAX_NUMBER_OF_MEMORIES];
 
 /********************************************************************
@@ -128,7 +127,7 @@ void memoryController_attemptRead(MemoryDevice_t* device) {
     int effectiveAddress = signal_addressBus - device->startOffset;
     if (effectiveAddress >= 0 && effectiveAddress < device->len) {
         // We are in range, put the value on the bus
-        formattedLog(debuglog, LOGTYPE_DEBUG, "[MEMORY] Device read @ %04X(dev_add=%04X) of value %04X\n", signal_addressBus, effectiveAddress, device->data[effectiveAddress]);
+        // formattedLog(debuglog, LOGTYPE_DEBUG, "[MEMORY] Device read @ %04X(dev_add=%04X) of value %04X\n", signal_addressBus, effectiveAddress, device->data[effectiveAddress]);
         signal_dataBus = device->data[effectiveAddress];
     }
 }
@@ -151,7 +150,7 @@ void memoryController_attemptWrite(MemoryDevice_t* device) {
     int effectiveAddress = signal_addressBus - device->startOffset;
     if (effectiveAddress >= 0 && effectiveAddress < device->len) {
         // We are in range, store the value from the bus
-        formattedLog(debuglog, LOGTYPE_DEBUG, "[MEMORY] Device write @ %04X(dev_add=%04X) of value %04X\n", signal_addressBus, effectiveAddress, device->data[effectiveAddress]);
+        // formattedLog(debuglog, LOGTYPE_DEBUG, "[MEMORY] Device write @ %04X(dev_add=%04X) of value %04X\n", signal_addressBus, effectiveAddress, device->data[effectiveAddress]);
         device->data[effectiveAddress] = signal_dataBus;
     }
 }

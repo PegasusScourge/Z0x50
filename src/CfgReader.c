@@ -57,6 +57,7 @@ Setting_t* cfgReader_createSetting(const char* name) {
     *(s->name + nameLen - 1) = '\0';
 
     s->value._int = 0;
+    s->value._dbl = 0;
     s->value._str = NULL;
 
     return s;
@@ -72,9 +73,10 @@ void cfgReader_destroySetting(Setting_t* s) {
     }
 
     directLog(debuglog, "Clean setting: ");
-    directLog(debuglog, "name='%s' ", s->name);
+    directLog(debuglog, "name='%s'", s->name);
+    directLog(debuglog, ", value _int=%i _dbl=%f ", s->value._int, s->value._dbl);
     if (s->value._str != NULL) {
-        directLog(debuglog, "_int=%i, _str='%s' ", s->value._int, s->value._str);
+        directLog(debuglog, "_str='%s' ", s->value._str);
         free(s->value._str);
     }
 
@@ -107,9 +109,9 @@ void cfgReader_cleanSettings() {
 ********************************************************************/
 
 /*
-Returns the value of a setting queried, or NO_SETTING by default
+Returns the value of a setting queried
 */
-int cfgReader_querySettingValue(const char* n) {
+int cfgReader_querySettingValueInt(const char* n) {
     for (int i = 0; i < MAX_NUM_SETTINGS; i++) {
         if (settings[i] != NULL) {
             // Valid setting, now search for the name
@@ -122,8 +124,46 @@ int cfgReader_querySettingValue(const char* n) {
             }
         }
     }
-    // We don't have the setting, so return NO_SETTING
-    return NO_SETTING;
+    return 0;
+}
+
+/*
+Returns the value of a setting queried
+*/
+double cfgReader_querySettingValueDouble(const char* n) {
+    for (int i = 0; i < MAX_NUM_SETTINGS; i++) {
+        if (settings[i] != NULL) {
+            // Valid setting, now search for the name
+            if (settings[i]->name != NULL) {
+                // It has a name!
+                if (strcmp(n, settings[i]->name) == 0) {
+                    // It matches!
+                    return settings[i]->value._dbl;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+/*
+Returns the value of a setting queried
+*/
+char* cfgReader_querySettingValueStr(const char* n) {
+    for (int i = 0; i < MAX_NUM_SETTINGS; i++) {
+        if (settings[i] != NULL) {
+            // Valid setting, now search for the name
+            if (settings[i]->name != NULL) {
+                // It has a name!
+                if (strcmp(n, settings[i]->name) == 0) {
+                    // It matches!
+                    if(settings[i]->value._str != NULL)
+                        return settings[i]->value._str;
+                }
+            }
+        }
+    }
+    return NULL;
 }
 
 /*
@@ -189,7 +229,7 @@ void cfgReader_processConfiguration(const char* data, const long int size) {
     }
 
     // Prepare the variables to capture the lines
-    char* line;
+    //char* line;
 #define MAX_NUM_LINES 50
     char* lines[MAX_NUM_LINES];
     int linesDetected = 0;
@@ -197,31 +237,33 @@ void cfgReader_processConfiguration(const char* data, const long int size) {
     // Prepare the token
     char token[2] = "\n";
 
+    linesDetected = sutil_split(buffer, size, lines, MAX_NUM_LINES, token);
+
     // Prepare the buffer freeing
-    char* baseOfBuffer = buffer; // Save the pointer so we can free it later
+    //char* baseOfBuffer = buffer; // Save the pointer so we can free it later
 
     // FROM THIS POINT buffer WILL CHANGE VALUE, FREE MEMORY WITH baseOfBuffer
 
     // NOW break the file down into lines
     // Get the first line
-    line = strtok(buffer, token);
+    //line = strtok(buffer, token);
 
-    while (line != NULL && linesDetected < MAX_NUM_LINES) {
-        // Save the current pointer
-        lines[linesDetected] = sutil_trim(line, NULL);
+    //while (line != NULL && linesDetected < MAX_NUM_LINES) {
+    //    // Save the current pointer
+    //    lines[linesDetected] = sutil_trim(line, NULL);
 
-        // Get the next line
-        line = strtok(NULL, token);
-        linesDetected++;
-    }
+    //    // Get the next line
+    //    line = strtok(NULL, token);
+    //    linesDetected++;
+    //}
 
     // Debug printing
-    directLog(debuglog, "[CFG PROCESS] Split file into %i lines:\n", linesDetected);
+    /*directLog(debuglog, "[CFG PROCESS] Split file into %i lines:\n", linesDetected);
     for (int i = 0; i < linesDetected; i++) {
         directLog(debuglog, "'");
         directLog(debuglog, lines[i]);
         directLog(debuglog, "'\n");
-    }
+    }*/
 
     // Now iterate through the lines and process them
     for (int i = 0; i < linesDetected; i++) {
@@ -230,7 +272,8 @@ void cfgReader_processConfiguration(const char* data, const long int size) {
 
     // Free the buffer
     directLog(debuglog, "[CFG PROCESS] Freeing buffer\n");
-    free(baseOfBuffer);
+    free(buffer);
+    // free(baseOfBuffer);
 }
 
 #define strequal(a, b) strcmp(a, b) == 0
@@ -258,16 +301,18 @@ void cfgReader_processLine(const char* ln) {
     // FROM THIS POINT buff WILL CHANGE VALUE, FREE MEMORY WITH buffBase
 
     // Get the first split
-    char* split;
-    split = strtok(buff, token);
+    //char* split;
+    //split = strtok(buff, token);
 
-    while (split != NULL && splitsDetected < NUM_SPLITS) {
-        splits[splitsDetected] = sutil_trim(split, NULL);
+    //while (split != NULL && splitsDetected < NUM_SPLITS) {
+    //    splits[splitsDetected] = sutil_trim(split, NULL);
 
-        // Get the next line
-        split = strtok(NULL, token);
-        splitsDetected++;
-    }
+    //    // Get the next line
+    //    split = strtok(NULL, token);
+    //    splitsDetected++;
+    //}
+
+    splitsDetected = sutil_split(buff, buffLen, splits, NUM_SPLITS, token);
 
     /*
     debug_printf("[CFG PROCESS] Split line '%s' into %i splits:\n", l, splitsDetected);
@@ -286,15 +331,16 @@ void cfgReader_processLine(const char* ln) {
             formattedLog(debuglog, LOGTYPE_DEBUG, "testLine says: '%s'\n", splits[1]);
         }
         else if (splits[0][0] == '#' || splits[0][0] == '!') {
-            formattedLog(debuglog, LOGTYPE_DEBUG, "Comment line: %s\n", ln);
+            // formattedLog(debuglog, LOGTYPE_DEBUG, "Comment line: %s\n", ln);
         }
         else if(splitsDetected == 2) {
             // If we have 2 splits, just add the setting
             s = cfgReader_createSetting(splits[0]);
             s->value._int = atoi(splits[1]);
+            s->value._dbl = atof(splits[1]);
 
             // Add the setting string value
-            directLog(debuglog, "Setting string split[1] len = %i\n", (int)strlen(splits[1]));
+            // directLog(debuglog, "Setting string split[1] len = %i\n", (int)strlen(splits[1]));
             int bLen = (int)strlen(splits[1]) + 1;
             s->value._str = calloc(bLen, sizeof(char));
             if (s->value._str != NULL) {
@@ -306,7 +352,7 @@ void cfgReader_processLine(const char* ln) {
         // If the setting isn't NULL, add it to the list
         if (s != NULL) {
             settings[currentSetting] = s;
-            formattedLog(debuglog, LOGTYPE_DEBUG, "Added setting '%s' at index %i, value _int=%i _str='%s'\n", s->name, currentSetting, s->value._int, s->value._str);
+            formattedLog(debuglog, LOGTYPE_DEBUG, "Added setting '%s' at index %i, value _int=%i _dbl=%f _str='%s'\n", s->name, currentSetting, s->value._int, s->value._dbl, s->value._str);
             currentSetting++;
         }
     }

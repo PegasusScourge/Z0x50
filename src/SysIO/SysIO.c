@@ -55,7 +55,7 @@ SysFile_t* sysIO_openFile(const char* path) {
 
     // Return the struct
     file->cached = false;
-    formattedLog(debuglog, LOGTYPE_MSG, "File '%s' opened successfully\n", file->path);
+    formattedLog(debuglog, LOGTYPE_DEBUG, "File '%s' opened successfully\n", file->path);
     return file;
 }
 

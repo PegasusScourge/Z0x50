@@ -47,6 +47,7 @@ MemoryDevice_t* memoryDevice_create(uint16_t sOffset, uint16_t len, bool wEn, bo
     }
 
     // We are ready to return the device
+    formattedLog(stdlog, LOGTYPE_MSG, "Created memory device @ %04X with len %04X, writeEn=%i readEn=%i\n", sOffset, len, wEn, rEn);
     return device;
 }
 

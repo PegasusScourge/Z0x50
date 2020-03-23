@@ -35,16 +35,16 @@ uint8_t instruction;
 int currentIndex = 0;
 int instrByteLen;
 int instrNumOperands;
-char* instrHumanString;
-int (*funcPointer)();
+const char* instrHumanString;
+const int (*funcPointer)();
 
 typedef struct DecompError {
     uint16_t prefix;
     uint8_t instruction;
     uint16_t operand;
     int index;
-    char* humanString;
-    char* errorComment;
+    const char* humanString;
+    const char* errorComment;
 } DecompError_t;
 
 LinkedList_t* listOfErrors = NULL;

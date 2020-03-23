@@ -22,6 +22,8 @@ Z80.c : Z80 CPU component
 #include "../Signals.h"
 #include "../SysIO/Log.h"
 
+#define debugFuncTell formattedLog(debuglog, LOGTYPE_DEBUG, "Microstate Exec %s\n", __FUNCTION__)
+
 /********************************************************************
 
     VARIABLES / DEFS / STRUCTS
@@ -51,10 +53,10 @@ Z80_DblRegister PC = { 0 };
 Z80_Instr_t cInstr; // The current instruction we are processing
 
 /* Z80 Internal State Variables */
-enum Z80InternalStateEnum { Z80State_Fetch, Z80State_Decode, Z80State_Execute };
-uint8_t internalState = Z80State_Fetch; // The broad state we are in
+int internalState = Z80State_Fetch; // The broad state we are in
 bool wait = false; // If true, the CPU stops at its current step and doesn't advance
-uint8_t microcodeState = 0; // Used by instruction functions to control their internal affairs
+int microcodeState = 0; // Used by instruction functions to control their internal affairs
+int Z80_state() { return internalState; }
 
 /* Data Movement Variables */
 uint16_t addressBusLatch = 0; // This value is pushed to the address bus during the start of memory read and write cycles. Needs to be preloaded
@@ -97,7 +99,7 @@ void Z80_init() {
     Z80_initSignals();
 
     // Lastly, connect the first function on the rising clock edge (the fetch T1Rising function)
-    onNextRisingCLCK = &Z80_M1T1Rise;
+    onNextRisingCLCK = &Z80_fetchCycleStart;
 }
 
 void Z80_initSignals() {
@@ -115,7 +117,7 @@ void Z80_initSignals() {
 
 void Z80_signalCLCKListener(bool rising) {
     // If waiting, just ignore the CLCK for now
-    if (wait)
+    if (wait || internalState == Z80State_Failure)
         return;
 
     // Complete a clock tick
@@ -144,10 +146,11 @@ void Z80_signalCLCKListener(bool rising) {
         onFinishMCycle = NULL; // NULL out the pointer
         func();
     }
-    else if (rising && onFinishMCycle == NULL) {
+    else if (rising && onFinishMCycle == NULL && onNextFallingCLCK == NULL) {
         // We have no function to complete but we need to! Fail the processor here
-        formattedLog(stdlog, LOGTYPE_ERROR, "Processor microstate execution has failed: no onRising or onFinishMCycle function to execute!\n");
+        formattedLog(stdlog, LOGTYPE_ERROR, "Processor microstate execution has failed: no function to execute!\n");
         wait = true; // Force a wait condition
+        internalState = Z80State_Failure;
     }
 }
 
@@ -172,9 +175,9 @@ void Z80_M1T1Rise() {
         // We require to match the fetch state!
         // Generate an error here?
         formattedLog(stdlog, LOGTYPE_ERROR, "Fetch start failed: not in fetch state\n");
-        return; // For now just return. This will halt the processor
+        internalState = Z80State_Failure;
+        return; // This will halt the processor
     }
-    printf("[FETCH]\n");
 
     // Set the necessary signals high
     signals_raiseSignal(&signal_MREQ);
@@ -253,7 +256,6 @@ void Z80_M1T3Rise() {
 
     // Do a decode
     internalState = Z80State_Decode;
-    formattedLog(debuglog, LOGTYPE_DEBUG, "[DECODE]\n");
     Z80_decode();
 
     // Setup the next function. The falling edge of M1T3 requires a MREQ fall and is where we decide the course of action: execution or memory read/write
@@ -301,7 +303,6 @@ Activates on the rising edge of MREADT1
 Puts addressBusLatch on the address bus
 */
 void Z80_memReadT1Rise() {
-    printf("[MEM READ]\n");
     // We are doing a memory read cycle, so irrespective of state we continue
 
     // Put the address on the bus
@@ -316,6 +317,7 @@ Activates on the falling edge of MREADT1
 Puts MREQ and RD low
 */
 void Z80_memReadT1Fall() {
+
     // Do signal dropping
     signals_dropSignal(&signal_MREQ);
     signals_dropSignal(&signal_RD);
@@ -329,6 +331,7 @@ Activates on the falling edge of MREADT2
 Reads the data from the data bus to the pointed location
 */
 void Z80_memReadT2Rise() {
+
     // Sample the data from the data bus and write it to the internalDataBus pointer
     if (internalDataBus) {
         // We have a valid place to write to perhaps?
@@ -344,6 +347,7 @@ Activates on the falling edge of MREADT2
 Puts MREQ and RD high
 */
 void Z80_memReadT2Fall() {
+
     // Do signal raising
     signals_raiseSignal(&signal_MREQ);
     signals_raiseSignal(&signal_RD);
@@ -363,7 +367,8 @@ Activates on the rising edge of MWRITET1
 Puts addressBusLatch on the address bus
 */
 void Z80_memWriteT1Rise() {
-    printf("[MEM WRITE]\n");
+
+    // printf("[MEM WRITE]\n");
     // We are doing a memory write cycle, so irrespective of state we continue
 
     // Put the address on the bus
@@ -378,6 +383,7 @@ Activates on the falling edge of MWRITET1
 Puts MREQ low and the data on the bus
 */
 void Z80_memWriteT1Fall() {
+
     // Do signal dropping
     signals_dropSignal(&signal_MREQ);
 
@@ -393,6 +399,8 @@ Activates on the falling edge of MWRITET2
 Puts WR low
 */
 void Z80_memWriteT2Fall() {
+    
+
     // Put WR low
     signals_dropSignal(&signal_WR);
 
@@ -405,6 +413,8 @@ Activates on the falling edge of MWRITET3
 Puts WR, MREQ high
 */
 void Z80_memWriteT3Fall() {
+    
+
     // Put signals high
     signals_raiseSignal(&signal_MREQ);
     signals_raiseSignal(&signal_WR);
@@ -423,7 +433,9 @@ Activates on the rising edge of M1T4
 Sets up the operand read
 */
 void Z80_prepReadOperands() {
-    printf("[OPERANDS: %i]\n", cInstr.numOperandsToRead);
+    
+
+    // printf("[OPERANDS: %i]\n", cInstr.numOperandsToRead);
 
     // The next rising edge needs to be a memory read cycle
     onNextRisingCLCK = &Z80_memReadCycleStart;
@@ -460,6 +472,8 @@ void Z80_prepReadOperands() {
 Similar to if we had encountered an operand to read, we have encountered a prefix and thus need to get the instruction in the next position in memory
 */
 void Z80_prepPrefixedInstructionRead() {
+    
+
     // We must transfer the "opcode" into our prefix buffer
     cInstr.prefix = (cInstr.prefix << 8) | cInstr.opcode;
 
@@ -477,8 +491,10 @@ This function is analagous to Z80_M1T3Rise and Z80_M1T3Fall, where we decide wha
 This takes place on a rising edge though, so we must in actuality EXECUTE the next function, not point to it like in others. <----- we don't do this for now, do we need to?
 */
 void Z80_finalisePrefixedInstructionRead() {
+    
+
     internalState = Z80State_Decode;
-    formattedLog(debuglog, LOGTYPE_DEBUG, "[PREFIXED DECODE]\n");
+    // formattedLog(debuglog, LOGTYPE_DEBUG, "[PREFIXED DECODE]\n");
     // Perform the decode
     Z80_decode();
 
@@ -497,10 +513,12 @@ Activates on the rising edge of M1T4 or when an execution can be completed in a 
 Executes the opcode and decides if we need a memory write cycle after
 */
 void Z80_executeInstruction() {
+    
+
     // Set to execute state
     internalState = Z80State_Execute;
 
-    printf("[EXECUTE]\n");
+    // printf("[EXECUTE]\n");
     // Check the processor state: if we are in a decode mode, defer execution to the decode module
 
 
@@ -561,12 +579,12 @@ void Z80_decode() {
     case PREFIX_IX:
     case PREFIX_IY:
         cInstr.detectedPrefix = true;
-        formattedLog(debuglog, LOGTYPE_DEBUG, "prefix %s (pc: %04X, %04X %02X)\n", cInstr.string, PC.v, cInstr.prefix, cInstr.opcode);
+        // formattedLog(debuglog, LOGTYPE_DEBUG, "prefix %s (pc: %04X, %04X %02X)\n", cInstr.string, PC.v, cInstr.prefix, cInstr.opcode);
         break;
 
     default:
         cInstr.detectedPrefix = false;
-        formattedLog(debuglog, LOGTYPE_DEBUG, "opcode %s (pc: %04X, %04X %02X)\n", cInstr.string, PC.v, cInstr.prefix, cInstr.opcode);
+        // formattedLog(debuglog, LOGTYPE_DEBUG, "opcode %s (pc: %04X, %04X %02X)\n", cInstr.string, PC.v, cInstr.prefix, cInstr.opcode);
         break;
     }
 }

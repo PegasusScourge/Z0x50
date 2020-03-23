@@ -81,6 +81,9 @@
     <ClCompile Include="src\LinkedList.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Oscillator.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Z0x50.h">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="src\Z80\Z80Flags.h">
       <Filter>Header Files\Z80</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Oscillator.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
