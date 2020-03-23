@@ -18,7 +18,7 @@ Z0xDecomp.c : Handles decompilation
 #include "Z80Decomp.h"
 #include "Z80Instructions.h"
 #include "../SysIO/Log.h"
-#include "../LinkedList.h"
+#include "../Util/LinkedList.h"
 
 FILE* decompLog = NULL;
 SysFile_t* dF = NULL;

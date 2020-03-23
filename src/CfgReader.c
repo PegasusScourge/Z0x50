@@ -18,7 +18,7 @@ CfgReader.c : Reads the CFG file and exposes the settings
 #include "SysIO/Log.h"
 #include "CfgReader.h"
 #include "SysIO/SysIO.h"
-#include "StringUtil.h"
+#include "Util/StringUtil.h"
 
 #include <stdlib.h>
 #include <stdio.h>

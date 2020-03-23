@@ -31,6 +31,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Util">
+      <UniqueIdentifier>{f4011a60-db2b-4e9d-8c17-e138b1d3d0f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Util">
+      <UniqueIdentifier>{92799c55-3ce9-4ea4-9b25-f931c7ca094f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Z0x50.c">
@@ -57,9 +63,6 @@
     <ClCompile Include="src\CfgReader.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\StringUtil.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\SysIO\Log.c">
       <Filter>Source Files\SysIO</Filter>
     </ClCompile>
@@ -78,11 +81,14 @@
     <ClCompile Include="src\Z80\Z80InstructionsPointers.c">
       <Filter>Source Files\Z80</Filter>
     </ClCompile>
-    <ClCompile Include="src\LinkedList.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Oscillator.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Util\LinkedList.c">
+      <Filter>Source Files\Util</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Util\StringUtil.c">
+      <Filter>Source Files\Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -116,23 +122,23 @@
     <ClInclude Include="src\CfgReader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\StringUtil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\SysIO\Log.h">
       <Filter>Header Files\SysIO</Filter>
     </ClInclude>
     <ClInclude Include="src\Z80\Z80Decomp.h">
       <Filter>Header Files\Z80</Filter>
     </ClInclude>
-    <ClInclude Include="src\LinkedList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Z80\Z80Flags.h">
       <Filter>Header Files\Z80</Filter>
     </ClInclude>
     <ClInclude Include="src\Oscillator.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Util\LinkedList.h">
+      <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Util\StringUtil.h">
+      <Filter>Header Files\Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

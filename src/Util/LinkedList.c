@@ -16,7 +16,7 @@ LinkedList.c : Provides a linked list
 */
 
 #include "LinkedList.h"
-#include "SysIO/Log.h"
+#include "../SysIO/Log.h"
 
 /********************************************************************
 

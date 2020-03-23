@@ -27,7 +27,7 @@ Can be run as a Sinclair ZX Spectrum or used as a basis for a larger project.
 #include "SysIO/SysIO.h"
 #include "Z80/Z80Decomp.h"
 #include "Oscillator.h"
-#include "StringUtil.h"
+#include "Util/StringUtil.h"
 
 #define MATCHARG(a, b) strcmp(argV[a], b) == 0
 

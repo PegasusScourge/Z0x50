@@ -20,13 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\CfgReader.c" />
-    <ClCompile Include="src\LinkedList.c" />
     <ClCompile Include="src\Oscillator.c" />
+    <ClCompile Include="src\Util\LinkedList.c" />
+    <ClCompile Include="src\Util\StringUtil.c" />
     <ClCompile Include="src\Z80\Z80Decomp.c" />
     <ClCompile Include="src\Memory\MemoryController.c" />
     <ClCompile Include="src\Memory\MemoryDevice.c" />
     <ClCompile Include="src\Signals.c" />
-    <ClCompile Include="src\StringUtil.c" />
     <ClCompile Include="src\SysIO\Log.c" />
     <ClCompile Include="src\SysIO\SysIO.c" />
     <ClCompile Include="src\Z0x50.c" />
@@ -39,13 +39,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\CfgReader.h" />
-    <ClInclude Include="src\LinkedList.h" />
     <ClInclude Include="src\Oscillator.h" />
+    <ClInclude Include="src\Util\LinkedList.h" />
+    <ClInclude Include="src\Util\StringUtil.h" />
     <ClInclude Include="src\Z80\Z80Decomp.h" />
     <ClInclude Include="src\Memory\MemoryController.h" />
     <ClInclude Include="src\Memory\MemoryDevice.h" />
     <ClInclude Include="src\Signals.h" />
-    <ClInclude Include="src\StringUtil.h" />
     <ClInclude Include="src\SysIO\Log.h" />
     <ClInclude Include="src\SysIO\SysIO.h" />
     <ClInclude Include="src\Z0x50.h" />
