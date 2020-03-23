@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{92799c55-3ce9-4ea4-9b25-f931c7ca094f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Video">
+      <UniqueIdentifier>{cbad909e-7e37-432b-a936-f666a0ad549d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Video">
+      <UniqueIdentifier>{ab6489fb-a98a-43de-9bc5-d7b3e0859627}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Z0x50.c">
@@ -90,6 +96,9 @@
     <ClCompile Include="src\Util\StringUtil.c">
       <Filter>Source Files\Util</Filter>
     </ClCompile>
+    <ClCompile Include="src\Video\VideoAdaptor.c">
+      <Filter>Source Files\Video</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Z0x50.h">
@@ -139,6 +148,9 @@
     </ClInclude>
     <ClInclude Include="src\Util\StringUtil.h">
       <Filter>Header Files\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Video\VideoAdaptor.h">
+      <Filter>Header Files\Video</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

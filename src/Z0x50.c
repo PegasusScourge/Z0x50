@@ -28,6 +28,7 @@ Can be run as a Sinclair ZX Spectrum or used as a basis for a larger project.
 #include "Z80/Z80Decomp.h"
 #include "Oscillator.h"
 #include "Util/StringUtil.h"
+#include "Video/VideoAdaptor.h"
 
 #define MATCHARG(a, b) strcmp(argV[a], b) == 0
 
@@ -37,6 +38,8 @@ const char* ASCII_terminalSlpit = "---------------------------------------\n";
 
 /* Z0x50 state information */
 int state = Z0State_NONE; // The state we are currently executing in. Takes a value of Z0StateEnum
+
+/* Cfg information */
 char* defaultCfg = "configuration.cfg"; // Default configuration file
 char* overrideCfg = NULL; // If this is non-NULL, we override the default CFG file
 
@@ -48,12 +51,18 @@ SysFile_t* decompilationFp = NULL;
 char** argV;
 int argC;
 
-/* RAND */
+/* Test variables */
 bool clkV = false;
 int i = 0;
+
+/* Tracking variables */
 unsigned long long numOscillations = 0;
 
-/* MAIN FUNCTION */
+/********************************************************************
+
+    Main Function
+
+********************************************************************/
 
 void Z0_main() {
     switch (state) {
@@ -106,7 +115,11 @@ void Z0_main() {
     }
 }
 
-/* Functions */
+/********************************************************************
+
+    Initialisation Functions
+
+********************************************************************/
 
 // Initialisation of the system from the arguments and CFG
 void Z0_initSystem() {
@@ -292,7 +305,11 @@ void Z0_parseArguments() {
 
 }
 
-/* Entry Point */
+/********************************************************************
+
+    Application Entry Point
+
+********************************************************************/
 
 int main(int argc, char* argv[]) {
     // Transfer ownership
@@ -322,14 +339,24 @@ int main(int argc, char* argv[]) {
         overrideCfg = defaultCfg;
     cfgReader_readConfiguration(overrideCfg);
 
-    formattedLog(stdlog, LOGTYPE_MSG, "Initialising system\n");
-    Z0_initSystem();
-
-    formattedLog(stdlog, LOGTYPE_MSG, "Launching\n");
-    // Call the main function
-    while (state != Z0State_NONE) {
-        Z0_main();
+    if (!videoAdaptor_initialise()) {
+        formattedLog(stdlog, LOGTYPE_ERROR, "Unable to continue: failed to initialise video adaptor\n");
     }
+    else {
+
+        formattedLog(stdlog, LOGTYPE_MSG, "Initialising system\n");
+        Z0_initSystem();
+
+        formattedLog(stdlog, LOGTYPE_MSG, "Launching\n");
+
+        // Call the main function in a loop
+        while (state != Z0State_NONE) {
+            Z0_main();
+        }
+
+    }
+
+    videoAdaptor_destroy();
 
     formattedLog(stdlog, LOGTYPE_MSG, "Exiting\n");
     // Check for a decomp file

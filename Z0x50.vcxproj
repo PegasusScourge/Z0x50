@@ -23,6 +23,7 @@
     <ClCompile Include="src\Oscillator.c" />
     <ClCompile Include="src\Util\LinkedList.c" />
     <ClCompile Include="src\Util\StringUtil.c" />
+    <ClCompile Include="src\Video\VideoAdaptor.c" />
     <ClCompile Include="src\Z80\Z80Decomp.c" />
     <ClCompile Include="src\Memory\MemoryController.c" />
     <ClCompile Include="src\Memory\MemoryDevice.c" />
@@ -42,6 +43,7 @@
     <ClInclude Include="src\Oscillator.h" />
     <ClInclude Include="src\Util\LinkedList.h" />
     <ClInclude Include="src\Util\StringUtil.h" />
+    <ClInclude Include="src\Video\VideoAdaptor.h" />
     <ClInclude Include="src\Z80\Z80Decomp.h" />
     <ClInclude Include="src\Memory\MemoryController.h" />
     <ClInclude Include="src\Memory\MemoryDevice.h" />
