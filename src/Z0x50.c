@@ -91,7 +91,7 @@ void Z0_main() {
         break;
 
     case Z0State_NORMAL:
-        if (numOscillations > 1000) {
+        if (numOscillations > 5000) {
             formattedLog(stdlog, LOGTYPE_MSG, "Z80 has reached termination\n");
             state = Z0State_NONE;
             break;
