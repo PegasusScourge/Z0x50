@@ -566,43 +566,36 @@ void Z80_decode() {
         cInstr.string = instructions_bitInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_bitInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
-        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     case PREFIX_EXX:
         cInstr.string = instructions_extendedInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_extendedInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
-        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     case PREFIX_IX:
         cInstr.string = instructions_IXInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_IXInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
-        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     case PREFIX_IY:
         cInstr.string = instructions_IYInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_IYInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
-        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     case PREFIX_IX_BITS:
         cInstr.string = instructions_IXBitInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_IXBitInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 3 ? cInstr.instrByteLen - 3 : 0;
-        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     case PREFIX_IY_BITS:
         cInstr.string = instructions_IYBitInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_IYBitInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 3 ? cInstr.instrByteLen - 3 : 0;
-        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     default:
         cInstr.string = instructions_mainInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_mainInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 1 ? cInstr.instrByteLen - 1 : 0;
-        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     }
 
@@ -621,6 +614,12 @@ void Z80_decode() {
         // formattedLog(debuglog, LOGTYPE_DEBUG, "opcode %s (pc: %04X, %04X %02X)\n", cInstr.string, PC.v, cInstr.prefix, cInstr.opcode);
         break;
     }
+
+    // Catch massive operand counts
+    if (cInstr.numOperands >= 3) {
+        cInstr.numOperands = 0;
+    }
+    cInstr.numOperandsToRead = cInstr.numOperands;
 }
 
 /*

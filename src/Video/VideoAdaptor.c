@@ -154,39 +154,35 @@ void videoAdaptor_pushSplash() {
 Activates on each clock cycle
 */
 void videoAdaptor_onCLCK(bool rising) {
-    if (rising) {
-        // Check the log hasn't exceeded our desired length
+    // Check our clock to see if we should respond to events. We only respond at a max frequency of 100Hz to make sure we don't overload the program
+    uint32_t elapsedEventTime = sfTime_asMilliseconds(sfClock_getElapsedTime(eventClock));
+    if (elapsedEventTime >= eventClockResponseTime) {
+        sfClock_restart(eventClock);
 
-        // Check our clock to see if we should respond to events. We only respond at a max frequency of 100Hz to make sure we don't overload the program
-        uint32_t elapsedEventTime = sfTime_asMilliseconds(sfClock_getElapsedTime(eventClock));
-        if (elapsedEventTime >= eventClockResponseTime) {
-            sfClock_restart(eventClock);
-
-            // Check for events
-            while (sfRenderWindow_pollEvent(mainWindow, &evt)) {
-                //if (evt.type == sfEvtClosed)
-                //    sfRenderWindow_close(mainWindow);
-            }
-
+        // Check for events
+        while (sfRenderWindow_pollEvent(mainWindow, &evt)) {
+            //if (evt.type == sfEvtClosed)
+            //    sfRenderWindow_close(mainWindow);
         }
+
+    }
         
-        uint32_t elapsedRenderTime = sfTime_asMilliseconds(sfClock_getElapsedTime(renderClock));
-        if (elapsedRenderTime >= renderClockResponseTime) {
-            sfClock_restart(renderClock);
-            // Just update for now
-            sfRenderWindow_clear(mainWindow, clearColor);
-            // Display the output of the system
-            // TODO
-            // Display the UI
-            if (currentScreen == NULL) {
-                videoAdaptor_pushSplash();
-            }
-            else {
-                currentScreen();
-            }
-            
-            sfRenderWindow_display(mainWindow);
+    uint32_t elapsedRenderTime = sfTime_asMilliseconds(sfClock_getElapsedTime(renderClock));
+    if (elapsedRenderTime >= renderClockResponseTime) {
+        sfClock_restart(renderClock);
+        // Just update for now
+        sfRenderWindow_clear(mainWindow, clearColor);
+        // Display the output of the system
+        // TODO
+        // Display the UI
+        if (currentScreen == NULL) {
+            videoAdaptor_pushSplash();
         }
+        else {
+            currentScreen();
+        }
+            
+        sfRenderWindow_display(mainWindow);
     }
 }
 
@@ -268,13 +264,7 @@ void videoAdaptor_setUIScreen(void (*newScreen)()) {
     currentScreen = newScreen;
 }
 
-void videoAdaptor_screenAllStats() {
-    if (currentScreenInit) {
-        currentScreenInit = false;
-        // Initialise information about this screen
-        clearColor = sfColor_fromRGB(0, 0, 0);
-    }
-
+void videoAdaptor_dispRegisters() {
     // Display the information
     int y = 20; int size = 15;
     videoAdaptor_displayText("Registers", mainWindow, 2, y, size, defaultFont, sfCyan); y += 20;
@@ -288,61 +278,77 @@ void videoAdaptor_screenAllStats() {
     videoAdaptor_displayText("SP:", mainWindow, 2, y, size, defaultFont, sfWhite); videoAdaptor_displayTextWithFmt(*displayInfo.SP, "%04X", mainWindow, 40, y, size, defaultFont, sfWhite); y += 15;
     char buff[9]; sutil_byteToBinary(*displayInfo.FReg, buff, 9);
     videoAdaptor_displayText("F:", mainWindow, 2, y, size, defaultFont, sfWhite); videoAdaptor_displayText(buff, mainWindow, 40, y, size, defaultFont, sfWhite); y += 15;
+}
 
+void videoAdaptor_dispSignals() {
     // Display signals
-    y = 200; size = 10; sfVector2f rpos = { 70,240 }; sfVector2f rsize = { 80, 5 };
+    int y = 200; int size = 10; sfVector2f rpos = { 70,240 }; sfVector2f rsize = { 80, 5 };
     videoAdaptor_displayText("Signals", mainWindow, 2, y, size, defaultFont, sfCyan); y += 16; rpos.y = (float)y + ((float)size / 2.5f);
-    
+    videoAdaptor_displayText("Clock", mainWindow, 2, y, size, defaultFont, sfWhite);
+    videoAdaptor_displayRect(mainWindow, rpos, rsize, signals_readSignal(&signal_CLCK) ? sfGreen : sfRed, sfWhite, 0); y += 11; rpos.y = (float)y + ((float)size / 2.5f);
     videoAdaptor_displayText("M1", mainWindow, 2, y, size, defaultFont, sfWhite);
     videoAdaptor_displayRect(mainWindow, rpos, rsize, signals_readSignal(&signal_M1) ? sfGreen : sfRed, sfWhite, 0); y += 11; rpos.y = (float)y + ((float)size / 2.5f);
-
     videoAdaptor_displayText("MREQ", mainWindow, 2, y, size, defaultFont, sfWhite);
     videoAdaptor_displayRect(mainWindow, rpos, rsize, signals_readSignal(&signal_MREQ) ? sfGreen : sfRed, sfWhite, 0); y += 11; rpos.y = (float)y + ((float)size / 2.5f);
-
     videoAdaptor_displayText("IORQ", mainWindow, 2, y, size, defaultFont, sfWhite);
     videoAdaptor_displayRect(mainWindow, rpos, rsize, signals_readSignal(&signal_IORQ) ? sfGreen : sfRed, sfWhite, 0); y += 11; rpos.y = (float)y + ((float)size / 2.5f);
-
     videoAdaptor_displayText("RD", mainWindow, 2, y, size, defaultFont, sfWhite);
     videoAdaptor_displayRect(mainWindow, rpos, rsize, signals_readSignal(&signal_RD) ? sfGreen : sfRed, sfWhite, 0); y += 11; rpos.y = (float)y + ((float)size / 2.5f);
-
     videoAdaptor_displayText("WR", mainWindow, 2, y, size, defaultFont, sfWhite);
     videoAdaptor_displayRect(mainWindow, rpos, rsize, signals_readSignal(&signal_WR) ? sfGreen : sfRed, sfWhite, 0); y += 11; rpos.y = (float)y + ((float)size / 2.5f);
-
     videoAdaptor_displayText("HALT", mainWindow, 2, y, size, defaultFont, sfWhite);
     videoAdaptor_displayRect(mainWindow, rpos, rsize, signals_readSignal(&signal_HALT) ? sfGreen : sfRed, sfWhite, 0); y += 11; rpos.y = (float)y + ((float)size / 2.5f);
-
     videoAdaptor_displayText("WAIT", mainWindow, 2, y, size, defaultFont, sfWhite);
     videoAdaptor_displayRect(mainWindow, rpos, rsize, signals_readSignal(&signal_WAIT) ? sfGreen : sfRed, sfWhite, 0); y += 11; rpos.y = (float)y + ((float)size / 2.5f);
-
     videoAdaptor_displayText("Data:", mainWindow, 2, y, size, defaultFont, sfWhite);
     videoAdaptor_displayTextWithFmt(signal_dataBus, "%02X", mainWindow, 70, y, size, defaultFont, sfWhite); y += 11;
-
     videoAdaptor_displayText("Address:", mainWindow, 2, y, size, defaultFont, sfWhite);
     videoAdaptor_displayTextWithFmt(signal_addressBus, "%04X", mainWindow, 70, y, size, defaultFont, sfWhite); y += 11;
+}
 
+void videoAdaptor_dispInstructionInfo() {
     // Display the instruction
-    y = 340; size = 15;
+    int y = 340; int size = 15;
     videoAdaptor_displayText("Current Instruction", mainWindow, 2, y, size, defaultFont, sfCyan); y += 20;
     videoAdaptor_displayText("Pre/Inst/$:", mainWindow, 2, y, size, defaultFont, sfWhite);
-    videoAdaptor_displayTextWithFmt(displayInfo.cInstr->prefix, "%04X", mainWindow, 130, y, size, defaultFont, displayInfo.cInstr->detectedPrefix ? sfBlue : sfRed);
-    videoAdaptor_displayTextWithFmt(displayInfo.cInstr->opcode, "%02X", mainWindow, 170, y, size, defaultFont, sfWhite);
-    videoAdaptor_displayTextWithFmt(displayInfo.cInstr->operand1, "%02X", mainWindow, 195, y, size, defaultFont, sfWhite);
-    videoAdaptor_displayTextWithFmt(displayInfo.cInstr->operand0, "%02X", mainWindow, 215, y, size, defaultFont, sfWhite); y += 15;
+    if (displayInfo.cInstr->detectedPrefix) {
+        if(displayInfo.cInstr->prefix == 0)
+            videoAdaptor_displayTextWithFmt(displayInfo.cInstr->prefix, "%04X", mainWindow, 130, y, size, defaultFont, sfBlue);
+        else
+            videoAdaptor_displayTextWithFmt(displayInfo.cInstr->prefix, "%04X", mainWindow, 130, y, size, defaultFont, sfYellow);
+    }
+    else {
+        videoAdaptor_displayTextWithFmt(displayInfo.cInstr->prefix, "%04X", mainWindow, 130, y, size, defaultFont, sfRed);
+    }
+    videoAdaptor_displayTextWithFmt(displayInfo.cInstr->opcode, "%02X", mainWindow, 170, y, size, defaultFont, sfGreen);
+    if (displayInfo.cInstr->numOperands == 0) {
+        videoAdaptor_displayTextWithFmt(displayInfo.cInstr->operand1, "%02X", mainWindow, 195, y, size, defaultFont, sfRed);
+        videoAdaptor_displayTextWithFmt(displayInfo.cInstr->operand0, "%02X", mainWindow, 215, y, size, defaultFont, sfRed); y += 15;
+    }
+    else {
+        videoAdaptor_displayTextWithFmt(displayInfo.cInstr->operand1, "%02X", mainWindow, 195, y, size, defaultFont, sfColor_fromRGB(255, 0, 255));
+        videoAdaptor_displayTextWithFmt(displayInfo.cInstr->operand0, "%02X", mainWindow, 215, y, size, defaultFont, sfColor_fromRGB(255, 0, 255)); y += 15;
+    }
     videoAdaptor_displayText("Instr Text:", mainWindow, 2, y, size, defaultFont, sfWhite);
     videoAdaptor_displayText(displayInfo.cInstr->string, mainWindow, 130, y, size, defaultFont, sfWhite);
+}
 
+void videoAdaptor_dispMemPC() {
     // Display memory content around PC
-    y = 410; size = 10; int x = 2;
+    int y = 410; int size = 10; int x = 2;
     unsigned int pc = *displayInfo.PC;
     videoAdaptor_displayText("Memory Around PC", mainWindow, 2, y, size, defaultFont, sfCyan); y += 12;
     for (int i = -8; i < 24; i++) {
         if (displayInfo.cInstr->detectedPrefix && (i == 0 || i == -1)) {
-            videoAdaptor_displayTextWithFmt(memoryController_rawRead(pc + i), "%02X", mainWindow, x, y, size, defaultFont, sfBlue);
+            if (displayInfo.cInstr->prefix == 0)
+                videoAdaptor_displayTextWithFmt(memoryController_rawRead(pc + i), "%02X", mainWindow, x, y, size, defaultFont, sfBlue);
+            else
+                videoAdaptor_displayTextWithFmt(memoryController_rawRead(pc + i), "%02X", mainWindow, x, y, size, defaultFont, sfYellow);
         }
         else if (i == (0 + displayInfo.cInstr->detectedPrefix)) {
             videoAdaptor_displayTextWithFmt(memoryController_rawRead(pc + i), "%02X", mainWindow, x, y, size, defaultFont, sfGreen);
         }
-        else if (i == (displayInfo.cInstr->numOperands + displayInfo.cInstr->detectedPrefix) && displayInfo.cInstr->numOperands > 0) {
+        else if (i > 0 && i <= (displayInfo.cInstr->numOperands + displayInfo.cInstr->detectedPrefix) && displayInfo.cInstr->numOperands > 0) {
             videoAdaptor_displayTextWithFmt(memoryController_rawRead(pc + i), "%02X", mainWindow, x, y, size, defaultFont, sfColor_fromRGB(255, 0, 255));
         }
         else {
@@ -350,9 +356,11 @@ void videoAdaptor_screenAllStats() {
         }
         x += 22;
     }
+}
 
+void videoAdaptor_dispMemSP() {
     // Display memory content around SP
-    y = 440; size = 10; x = 2;
+    int y = 440; int size = 10; int x = 2;
     unsigned int sp = *displayInfo.SP;
     videoAdaptor_displayText("Memory Around SP", mainWindow, 2, y, size, defaultFont, sfCyan); y += 12;
     for (int i = -8; i < 24; i++) {
@@ -364,9 +372,11 @@ void videoAdaptor_screenAllStats() {
         }
         x += 22;
     }
+}
 
+void videoAdaptor_dispMemAddrBus() {
     // Display memory content around addressBus
-    y = 470; size = 10; x = 2;
+    int y = 470; int size = 10; int x = 2;
     videoAdaptor_displayText("Memory Around Address Bus", mainWindow, 2, y, size, defaultFont, sfCyan); y += 12;
     for (int i = -8; i < 24; i++) {
         if (i == 0) {
@@ -377,4 +387,19 @@ void videoAdaptor_screenAllStats() {
         }
         x += 22;
     }
+}
+
+void videoAdaptor_screenAllStats() {
+    if (currentScreenInit) {
+        currentScreenInit = false;
+        // Initialise information about this screen
+        clearColor = sfColor_fromRGB(0, 0, 0);
+    }
+
+    videoAdaptor_dispRegisters();
+    videoAdaptor_dispInstructionInfo();
+    videoAdaptor_dispSignals();
+    videoAdaptor_dispMemPC();
+    videoAdaptor_dispMemSP();
+    videoAdaptor_dispMemAddrBus();
 }

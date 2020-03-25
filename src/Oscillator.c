@@ -28,6 +28,8 @@ double freqMHz = 0.1;
 double microsPerClock = 0.0;
 double overflow = 0;
 
+bool clockState = false;
+
 sfClock* clock;
 
 void oscillator_init() {
@@ -68,8 +70,13 @@ bool oscillator_tick() {
     while (overflow > microsPerClock) {
         overflow -= microsPerClock;
         ticksDone++;
-        signals_raiseSignal(&signal_CLCK);
-        signals_dropSignal(&signal_CLCK);
+        clockState = !clockState;
+        if (clockState) {
+            signals_raiseSignal(&signal_CLCK);
+        }   
+        else {
+            signals_dropSignal(&signal_CLCK);
+        }
     }
     // directLog(debuglog, "Completed %i ticks\n", ticksDone);
 
