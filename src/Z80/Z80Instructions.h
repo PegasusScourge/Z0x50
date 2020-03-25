@@ -46,7 +46,7 @@ typedef struct Z80_Instr {
 
     uint8_t numOperands; // Number of operands the instruction has after the opcode
     uint8_t numOperandsToRead; // Number of operands left to be read
-
+    uint8_t instrByteLen;
     bool detectedPrefix;
 } Z80_Instr_t;
 

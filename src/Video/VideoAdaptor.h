@@ -21,9 +21,28 @@ VideoAdaptor.h : Handles the interface between the system and the graphics for t
 #include <stdint.h>
 
 #include "SFML/Graphics.h"
+#include "../Z80/Z80Instructions.h"
 
 extern sfRenderWindow* mainWindow;
 extern sfFont* defaultFont;
+
+typedef struct DisplayInf {
+    const uint8_t* AReg;
+    const uint8_t* FReg;
+    const uint16_t* BCReg;
+    const uint16_t* DEReg;
+    const uint16_t* HLReg;
+    const uint16_t* IX;
+    const uint16_t* IY;
+    const uint16_t* PC;
+    const uint16_t* SP;
+    Z80_Instr_t* cInstr;
+
+} DisplayInf_t;
+
+extern DisplayInf_t displayInfo;
+extern void (*currentScreen)();
+extern sfColor clearColor;
 
 /********************************************************************
 
@@ -42,6 +61,17 @@ void videoAdaptor_onCLCK(bool rising);
 
 ********************************************************************/
 
+void videoAdaptor_displayRect(sfRenderWindow* window, sfVector2f pos, sfVector2f size, sfColor fillColor, sfColor outlineColor, float outlineThickness);
 void videoAdaptor_displayText(const char* string, sfRenderWindow* window, unsigned int x, unsigned int y, unsigned int size, sfFont* font, sfColor c);
 void videoAdaptor_displayTextFromInt(int num, int radix, sfRenderWindow* window, unsigned int x, unsigned int y, unsigned int size, sfFont* font, sfColor c);
 void videoAdaptor_displayTextFromDouble(double num, unsigned int numDigits, sfRenderWindow* window, unsigned int x, unsigned int y, unsigned int size, sfFont* font, sfColor c);
+void videoAdaptor_displayTextWithFmt(int num, const char* fmt, sfRenderWindow* window, unsigned int x, unsigned int y, unsigned int size, sfFont* font, sfColor c);
+
+/********************************************************************
+
+    C-SFML UI Screens
+
+********************************************************************/
+
+void videoAdaptor_setUIScreen(void (*newScreen)());
+void videoAdaptor_screenAllStats();

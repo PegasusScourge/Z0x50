@@ -160,6 +160,9 @@ void Z0_initSystem() {
         break;
 
     case Z0State_NORMAL:
+        // Display the AllStats UI
+        videoAdaptor_setUIScreen(&videoAdaptor_screenAllStats);
+
         // Load memory devices here
         Z0_loadMemoryDevices();
 

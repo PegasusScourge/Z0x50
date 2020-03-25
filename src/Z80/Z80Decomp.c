@@ -168,13 +168,13 @@ void decomp_deriveInstructionInformation() {
         switch (prefix) {
         case PREFIX_BITS:
             instrByteLen = instructions_bitInstructionParams[instruction];
-            instrNumOperands = instrByteLen > 1 ? instrByteLen - 2 : 0;
+            instrNumOperands = instrByteLen > 2 ? instrByteLen - 2 : 0;
             instrHumanString = instructions_bitInstructionText[instruction];
             funcPointer = instructions_bitInstructionFuncs[instruction];
             break;
         case PREFIX_IY:
             instrByteLen = instructions_IYInstructionParams[instruction];
-            instrNumOperands = instrByteLen > 1 ? instrByteLen - 2 : 0;
+            instrNumOperands = instrByteLen > 2 ? instrByteLen - 2 : 0;
             instrHumanString = instructions_IYInstructionText[instruction];
             funcPointer = instructions_IYInstructionFuncs[instruction];
             break;
@@ -182,13 +182,13 @@ void decomp_deriveInstructionInformation() {
             // decompLog("Unhandled prefix code: %04X, %s\n", prefix, instructions_mainInstructionText[prefix]);
             // instrByteLen = -2;
             instrByteLen = instructions_extendedInstructionParams[instruction];
-            instrNumOperands = instrByteLen > 1 ? instrByteLen - 2 : 0;
+            instrNumOperands = instrByteLen > 2 ? instrByteLen - 2 : 0;
             instrHumanString = instructions_extendedInstructionText[instruction];
             funcPointer = instructions_extendedInstructionFuncs[instruction];
             break;
         case PREFIX_IX:
             instrByteLen = instructions_IXInstructionParams[instruction];
-            instrNumOperands = instrByteLen > 1 ? instrByteLen - 2 : 0;
+            instrNumOperands = instrByteLen > 2 ? instrByteLen - 2 : 0;
             instrHumanString = instructions_IXInstructionText[instruction];
             funcPointer = instructions_IXInstructionFuncs[instruction];
             break;
@@ -198,7 +198,7 @@ void decomp_deriveInstructionInformation() {
             break;
         case PREFIX_IY_BITS:
             instrByteLen = instructions_IYBitInstructionParams[instruction];
-            instrNumOperands = instrByteLen > 1 ? instrByteLen - 3 : 0;
+            instrNumOperands = instrByteLen > 3 ? instrByteLen - 3 : 0;
             instrHumanString = instructions_IYBitInstructionText[instruction];
             funcPointer = instructions_IYBitInstructionFuncs[instruction];
             break;

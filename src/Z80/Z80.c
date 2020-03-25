@@ -21,6 +21,7 @@ Z80.c : Z80 CPU component
 
 #include "../Signals.h"
 #include "../SysIO/Log.h"
+#include "../Video/VideoAdaptor.h"
 
 #define debugFuncTell formattedLog(debuglog, LOGTYPE_DEBUG, "Microstate Exec %s\n", __FUNCTION__)
 
@@ -107,6 +108,18 @@ void Z80_initSignals() {
     signals_addListener(&signal_CLCK, &Z80_signalCLCKListener);
     // Add the wait listener
     signals_addListener(&signal_WAIT, &Z80_signalWAITListener);
+
+    // Connect the video adaptor hooks
+    displayInfo.AReg = &AF.bytes[UPPER];
+    displayInfo.FReg = &AF.bytes[LOWER];
+    displayInfo.BCReg = &BC.v;
+    displayInfo.DEReg = &DE.v;
+    displayInfo.HLReg = &HL.v;
+    displayInfo.IX = &IX.v;
+    displayInfo.IY = &IY.v;
+    displayInfo.SP = &SP.v;
+    displayInfo.PC = &PC.v;
+    displayInfo.cInstr = &cInstr;
 }
 
 /********************************************************************
@@ -189,6 +202,9 @@ void Z80_M1T1Rise() {
 
     // Place PC on the bus
     signal_addressBus = PC.v;
+
+    // Update our internal addressLatch
+    addressBusLatch = PC.v;
 
     // Setup the next function to be called, which is a falling edge. RD and MREQ disable
     onNextFallingCLCK = &Z80_M1T1Fall;
@@ -433,8 +449,6 @@ Activates on the rising edge of M1T4
 Sets up the operand read
 */
 void Z80_prepReadOperands() {
-    
-
     // printf("[OPERANDS: %i]\n", cInstr.numOperandsToRead);
 
     // The next rising edge needs to be a memory read cycle
@@ -445,11 +459,13 @@ void Z80_prepReadOperands() {
         onFinishMCycle = &Z80_executeInstruction;
         // Point to operand0
         internalDataBus = &cInstr.operand0;
+        addressBusLatch++;
     }
     else if (cInstr.numOperandsToRead == 2) {
         onFinishMCycle = &Z80_prepReadOperands;
         // Point to operand1
         internalDataBus = &cInstr.operand1;
+        addressBusLatch++;
     }
     else {
         // We have no more operands to read, move to execution. Somehow we ended up here? Maybe detected 3 operands?????
@@ -472,12 +488,11 @@ void Z80_prepReadOperands() {
 Similar to if we had encountered an operand to read, we have encountered a prefix and thus need to get the instruction in the next position in memory
 */
 void Z80_prepPrefixedInstructionRead() {
-    
-
     // We must transfer the "opcode" into our prefix buffer
     cInstr.prefix = (cInstr.prefix << 8) | cInstr.opcode;
 
     // Now we must set up the memory read cycle to read into the opcode location by pointing the internalDataBus at it
+    addressBusLatch++;
     internalDataBus = &cInstr.opcode;
     // Now set up the return function
     onFinishMCycle = &Z80_finalisePrefixedInstructionRead;
@@ -491,8 +506,6 @@ This function is analagous to Z80_M1T3Rise and Z80_M1T3Fall, where we decide wha
 This takes place on a rising edge though, so we must in actuality EXECUTE the next function, not point to it like in others. <----- we don't do this for now, do we need to?
 */
 void Z80_finalisePrefixedInstructionRead() {
-    
-
     internalState = Z80State_Decode;
     // formattedLog(debuglog, LOGTYPE_DEBUG, "[PREFIXED DECODE]\n");
     // Perform the decode
@@ -513,14 +526,14 @@ Activates on the rising edge of M1T4 or when an execution can be completed in a 
 Executes the opcode and decides if we need a memory write cycle after
 */
 void Z80_executeInstruction() {
+    // Increment PC
+    PC.v += cInstr.instrByteLen;
     
-
     // Set to execute state
     internalState = Z80State_Execute;
 
     // printf("[EXECUTE]\n");
     // Check the processor state: if we are in a decode mode, defer execution to the decode module
-
 
     // Excution finished for now, set to the next M1 cycle
     onFinishMCycle = &Z80_fetchCycleStart;
@@ -551,24 +564,45 @@ void Z80_decode() {
     switch (cInstr.prefix) {
     case PREFIX_BITS:
         cInstr.string = instructions_bitInstructionText[cInstr.opcode];
+        cInstr.instrByteLen = instructions_bitInstructionParams[cInstr.opcode];
+        cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
+        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     case PREFIX_EXX:
         cInstr.string = instructions_extendedInstructionText[cInstr.opcode];
+        cInstr.instrByteLen = instructions_extendedInstructionParams[cInstr.opcode];
+        cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
+        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     case PREFIX_IX:
         cInstr.string = instructions_IXInstructionText[cInstr.opcode];
+        cInstr.instrByteLen = instructions_IXInstructionParams[cInstr.opcode];
+        cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
+        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     case PREFIX_IY:
         cInstr.string = instructions_IYInstructionText[cInstr.opcode];
+        cInstr.instrByteLen = instructions_IYInstructionParams[cInstr.opcode];
+        cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
+        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     case PREFIX_IX_BITS:
         cInstr.string = instructions_IXBitInstructionText[cInstr.opcode];
+        cInstr.instrByteLen = instructions_IXBitInstructionParams[cInstr.opcode];
+        cInstr.numOperands = cInstr.instrByteLen > 3 ? cInstr.instrByteLen - 3 : 0;
+        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     case PREFIX_IY_BITS:
         cInstr.string = instructions_IYBitInstructionText[cInstr.opcode];
+        cInstr.instrByteLen = instructions_IYBitInstructionParams[cInstr.opcode];
+        cInstr.numOperands = cInstr.instrByteLen > 3 ? cInstr.instrByteLen - 3 : 0;
+        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     default:
         cInstr.string = instructions_mainInstructionText[cInstr.opcode];
+        cInstr.instrByteLen = instructions_mainInstructionParams[cInstr.opcode];
+        cInstr.numOperands = cInstr.instrByteLen > 1 ? cInstr.instrByteLen - 1 : 0;
+        cInstr.numOperandsToRead = cInstr.numOperands;
         break;
     }
 

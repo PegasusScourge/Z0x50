@@ -53,6 +53,7 @@ void memoryController_processOnCLCK(MemoryDevice_t* device, bool rising);
 
 ********************************************************************/
 
+uint8_t memoryController_rawRead(uint16_t address);
 void memoryController_attemptRead(MemoryDevice_t* device);
 
 /********************************************************************

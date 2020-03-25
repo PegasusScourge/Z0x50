@@ -115,6 +115,19 @@ void memoryController_processOnCLCK(MemoryDevice_t* device, bool rising) {
 
 ********************************************************************/
 
+uint8_t memoryController_rawRead(uint16_t address) {
+    for (int i = 0; i < MAX_NUMBER_OF_MEMORIES; i++) {
+        if (memories[i] != NULL) {
+            // Get the effectiveAddress, and then test if it is in range
+            int effectiveAddress = address - memories[i]->startOffset;
+            if (effectiveAddress >= 0 && effectiveAddress < memories[i]->len) {
+                return memories[i]->data[effectiveAddress];
+            }
+        }
+    }
+    return 0;
+}
+
 /*
 If the address bus is set to a value in the range of the provided device, place the data at that address on the data bus
 */

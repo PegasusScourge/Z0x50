@@ -79,3 +79,14 @@ int sutil_split(char* b, size_t bLen, char** splits, size_t splitsLen, const cha
 
     return linesDetected;
 }
+
+void sutil_byteToBinary(uint8_t byte, char* buffer, int bufferLen) {
+    for (int i = 7, j = 0; i >= 0 && j < bufferLen - 1; i--, j++) {
+        int value = (byte >> i) & 0x1;
+        if (value)
+            buffer[j] = '1';
+        else
+            buffer[j] = '0';
+    }
+    buffer[bufferLen - 1] = '\0';
+}
