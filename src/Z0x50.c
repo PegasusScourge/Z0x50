@@ -358,6 +358,10 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    while (closeRequested == false) {
+        videoAdaptor_onCLCK(true);
+    }
+
     videoAdaptor_destroy();
 
     formattedLog(stdlog, LOGTYPE_MSG, "Exiting\n");

@@ -163,7 +163,7 @@ void Z80_signalCLCKListener(bool rising) {
     else if (rising && onFinishMCycle == NULL && onNextFallingCLCK == NULL) {
         // We have no function to complete but we need to! Fail the processor here
         formattedLog(stdlog, LOGTYPE_ERROR, "Processor microstate execution has failed: no function to execute!\n");
-        wait = true; // Force a wait condition
+        signals_raiseSignal(&signal_WAIT);
         internalState = Z80State_Failure;
     }
 }
@@ -534,12 +534,41 @@ void Z80_executeInstruction() {
     internalState = Z80State_Execute;
 
     // Attempt an execution
+    if (cInstr.execFunction == NULL) {
+        // FAIL!
+        formattedLog(stdlog, LOGTYPE_ERROR, "Processor microstate execution has failed: execFunction was null!\n");
+        signals_raiseSignal(&signal_WAIT);
+        internalState = Z80State_Failure;
+        return;
+    }
+    int execFuncResponse = cInstr.execFunction();
 
-
-    // Excution finished for now, set to the next M1 cycle
-    onFinishMCycle = &Z80_fetchCycleStart;
-    // Set back to fetch state
-    internalState = Z80State_Fetch;
+    if (execFuncResponse == INSTR_EXEC_FAILED) {
+        // FAIL!
+        formattedLog(stdlog, LOGTYPE_WARN, "Processor microstate execution has give a failure: execFunction returned a failure\n");
+        signals_raiseSignal(&signal_WAIT);
+    }
+    else if (execFuncResponse == INSTR_EXEC_SUCCESS) {
+        // We are ready to move on
+        // Excution finished for now, set to the next M1 cycle
+        onFinishMCycle = &Z80_fetchCycleStart;
+        // Set back to fetch state
+        internalState = Z80State_Fetch;
+    }
+    else if(execFuncResponse == INSTR_EXEC_CONT){
+        // We stil need to continue
+        onNextRisingCLCK = &Z80_executeInstruction;
+    }
+    else if (execFuncResponse == INSTR_EXEC_NOTIMPL) {
+        formattedLog(stdlog, LOGTYPE_ERROR, "Processor microstate execution has give a failure: this opcode is not implemented\n");
+        signals_raiseSignal(&signal_WAIT);
+        internalState = Z80State_Failure;
+        return;
+    }
+    else {
+        formattedLog(stdlog, LOGTYPE_WARN, "Processor microstate execution has give a failure: execFunction returned an unknown response of %i\n", execFuncResponse);
+        signals_raiseSignal(&signal_WAIT);
+    }
 }
 
 /********************************************************************
