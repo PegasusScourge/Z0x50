@@ -27,8 +27,7 @@ extern sfRenderWindow* mainWindow;
 extern sfFont* defaultFont;
 
 typedef struct DisplayInf {
-    const uint8_t* AReg;
-    const uint8_t* FReg;
+    const uint16_t* AFReg;
     const uint16_t* BCReg;
     const uint16_t* DEReg;
     const uint16_t* HLReg;
@@ -37,9 +36,9 @@ typedef struct DisplayInf {
     const uint16_t* PC;
     const uint16_t* SP;
     Z80_Instr_t* cInstr;
-
 } DisplayInf_t;
 
+extern bool closeRequested;
 extern DisplayInf_t displayInfo;
 extern void (*currentScreen)();
 extern sfColor clearColor;
@@ -65,7 +64,8 @@ void videoAdaptor_displayRect(sfRenderWindow* window, sfVector2f pos, sfVector2f
 void videoAdaptor_displayText(const char* string, sfRenderWindow* window, unsigned int x, unsigned int y, unsigned int size, sfFont* font, sfColor c);
 void videoAdaptor_displayTextFromInt(int num, int radix, sfRenderWindow* window, unsigned int x, unsigned int y, unsigned int size, sfFont* font, sfColor c);
 void videoAdaptor_displayTextFromDouble(double num, unsigned int numDigits, sfRenderWindow* window, unsigned int x, unsigned int y, unsigned int size, sfFont* font, sfColor c);
-void videoAdaptor_displayTextWithFmt(int num, const char* fmt, sfRenderWindow* window, unsigned int x, unsigned int y, unsigned int size, sfFont* font, sfColor c);
+void videoAdaptor_displayTextFromIntWithFmt(int num, const char* fmt, sfRenderWindow* window, unsigned int x, unsigned int y, unsigned int size, sfFont* font, sfColor c);
+void videoAdaptor_displayTextFromUIntWithFmt(unsigned int num, const char* fmt, sfRenderWindow* window, unsigned int x, unsigned int y, unsigned int size, sfFont* font, sfColor c);
 
 /********************************************************************
 

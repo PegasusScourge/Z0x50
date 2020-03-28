@@ -47,6 +47,7 @@ typedef struct Z80_Instr {
     uint8_t numOperands; // Number of operands the instruction has after the opcode
     uint8_t numOperandsToRead; // Number of operands left to be read
     uint8_t instrByteLen;
+    const int (*execFunction)();
     bool detectedPrefix;
 } Z80_Instr_t;
 
@@ -56,6 +57,7 @@ extern const Z80_Instr_t instructions_NULLInstr;
 #define INSTR_EXEC_FAILED -1
 #define INSTR_EXEC_NOTIMPL -2
 #define INSTR_EXEC_SUCCESS 0
+#define INSTR_EXEC_CONT 1
 
 /* Instruction pointer tables */
 int instructions_NInstr();

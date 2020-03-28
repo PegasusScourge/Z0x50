@@ -353,10 +353,9 @@ int main(int argc, char* argv[]) {
         formattedLog(stdlog, LOGTYPE_MSG, "Launching\n");
 
         // Call the main function in a loop
-        while (state != Z0State_NONE) {
+        while (state != Z0State_NONE && closeRequested == false) {
             Z0_main();
         }
-
     }
 
     videoAdaptor_destroy();

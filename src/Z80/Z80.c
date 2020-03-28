@@ -32,23 +32,23 @@ Z80.c : Z80 CPU component
 ********************************************************************/
 
 /* General Registers */
-Z80_DblRegister AF = { 0 };
-Z80_DblRegister BC = { 0 };
-Z80_DblRegister DE = { 0 };
-Z80_DblRegister HL = { 0 };
+uint16_t AF = 0;
+uint16_t BC = 0;
+uint16_t DE = 0;
+uint16_t HL = 0;
 
 /* Alternate General Registers */
-Z80_DblRegister AFPrime = { 0 };
-Z80_DblRegister BCPrime = { 0 };
-Z80_DblRegister DEPrime = { 0 };
-Z80_DblRegister HLPrime = { 0 };
+uint16_t AFPrime = 0;
+uint16_t BCPrime = 0;
+uint16_t DEPrime = 0;
+uint16_t HLPrime = 0;
 
 /* Special Registers */
-Z80_DblRegister IVMR = { 0 };
-Z80_DblRegister IX = { 0 };
-Z80_DblRegister IY = { 0 };
-Z80_DblRegister SP = { 0 };
-Z80_DblRegister PC = { 0 };
+uint16_t IVMR = 0;
+uint16_t IX = 0;
+uint16_t IY = 0;
+uint16_t SP = 0;
+uint16_t PC = 0;
 
 /* Z80 Instruction */
 Z80_Instr_t cInstr; // The current instruction we are processing
@@ -77,13 +77,15 @@ void (*onFinishMCycle)() = NULL;
 ********************************************************************/
 
 void Z80Flags_setFlag(int f) {
-    AF.bytes[LOWER] = AF.bytes[LOWER] | (0b00000001 << f);
+    uint8_t lower = REG_LOWER(AF) | (0b00000001 << f);
+    AF = (AF & 0xF0) | lower;
 }
 void Z80Flags_clearFlag(int f) {
-    AF.bytes[LOWER] = AF.bytes[LOWER] & ~(0b00000001 << f);
+    uint8_t lower = REG_LOWER(AF) | (~(0b00000001 << f));
+    AF = (AF & 0xF0) | lower;
 }
 bool Z80Flags_readFlag(int f) {
-    return (AF.bytes[LOWER] & (0b00000001 << f)) == 1;
+    return (REG_LOWER(AF) & (0b00000001 << f)) == 1;
 }
 
 /********************************************************************
@@ -110,15 +112,14 @@ void Z80_initSignals() {
     signals_addListener(&signal_WAIT, &Z80_signalWAITListener);
 
     // Connect the video adaptor hooks
-    displayInfo.AReg = &AF.bytes[UPPER];
-    displayInfo.FReg = &AF.bytes[LOWER];
-    displayInfo.BCReg = &BC.v;
-    displayInfo.DEReg = &DE.v;
-    displayInfo.HLReg = &HL.v;
-    displayInfo.IX = &IX.v;
-    displayInfo.IY = &IY.v;
-    displayInfo.SP = &SP.v;
-    displayInfo.PC = &PC.v;
+    displayInfo.AFReg = &AF;
+    displayInfo.BCReg = &BC;
+    displayInfo.DEReg = &DE;
+    displayInfo.HLReg = &HL;
+    displayInfo.IX = &IX;
+    displayInfo.IY = &IY;
+    displayInfo.SP = &SP;
+    displayInfo.PC = &PC;
     displayInfo.cInstr = &cInstr;
 }
 
@@ -201,10 +202,10 @@ void Z80_M1T1Rise() {
     signals_dropSignal(&signal_M1);
 
     // Place PC on the bus
-    signal_addressBus = PC.v;
+    signal_addressBus = PC;
 
     // Update our internal addressLatch
-    addressBusLatch = PC.v;
+    addressBusLatch = PC;
 
     // Setup the next function to be called, which is a falling edge. RD and MREQ disable
     onNextFallingCLCK = &Z80_M1T1Fall;
@@ -527,13 +528,13 @@ Executes the opcode and decides if we need a memory write cycle after
 */
 void Z80_executeInstruction() {
     // Increment PC
-    PC.v += cInstr.instrByteLen;
+    PC += cInstr.instrByteLen;
     
     // Set to execute state
     internalState = Z80State_Execute;
 
-    // printf("[EXECUTE]\n");
-    // Check the processor state: if we are in a decode mode, defer execution to the decode module
+    // Attempt an execution
+
 
     // Excution finished for now, set to the next M1 cycle
     onFinishMCycle = &Z80_fetchCycleStart;
@@ -566,36 +567,43 @@ void Z80_decode() {
         cInstr.string = instructions_bitInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_bitInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
+        cInstr.execFunction = instructions_bitInstructionFuncs[cInstr.opcode];
         break;
     case PREFIX_EXX:
         cInstr.string = instructions_extendedInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_extendedInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
+        cInstr.execFunction = instructions_extendedInstructionFuncs[cInstr.opcode];
         break;
     case PREFIX_IX:
         cInstr.string = instructions_IXInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_IXInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
+        cInstr.execFunction = instructions_IXInstructionFuncs[cInstr.opcode];
         break;
     case PREFIX_IY:
         cInstr.string = instructions_IYInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_IYInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 2 ? cInstr.instrByteLen - 2 : 0;
+        cInstr.execFunction = instructions_IYInstructionFuncs[cInstr.opcode];
         break;
     case PREFIX_IX_BITS:
         cInstr.string = instructions_IXBitInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_IXBitInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 3 ? cInstr.instrByteLen - 3 : 0;
+        // cInstr.execFunction = instructions_IXBitInstructionFuncs[cInstr.opcode];
         break;
     case PREFIX_IY_BITS:
         cInstr.string = instructions_IYBitInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_IYBitInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 3 ? cInstr.instrByteLen - 3 : 0;
+        cInstr.execFunction = instructions_IYBitInstructionFuncs[cInstr.opcode];
         break;
     default:
         cInstr.string = instructions_mainInstructionText[cInstr.opcode];
         cInstr.instrByteLen = instructions_mainInstructionParams[cInstr.opcode];
         cInstr.numOperands = cInstr.instrByteLen > 1 ? cInstr.instrByteLen - 1 : 0;
+        cInstr.execFunction = instructions_mainInstructionFuncs[cInstr.opcode];
         break;
     }
 
@@ -632,7 +640,7 @@ void Z80_decodeBranchDecision() {
         onNextRisingCLCK = &Z80_prepPrefixedInstructionRead;
     }
     // If we have no operands, we can just do an execution
-    else if (cInstr.numOperands == 0) {
+    else if (cInstr.numOperandsToRead == 0) {
         onNextRisingCLCK = &Z80_executeInstruction;
     }
     else {

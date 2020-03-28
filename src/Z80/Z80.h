@@ -21,12 +21,8 @@ Z80.h : Z80 CPU component
 #include <stdbool.h>
 
 /* 16bit register definition */
-#define UPPER 0
-#define LOWER 1
-typedef union Z80_DblRegister {
-    uint16_t v;
-    uint8_t bytes[2];
-} Z80_DblRegister;
+#define REG_UPPER(x) (x >> 8)
+#define REG_LOWER(x) (x & 0xF)
 
 /* Z80 Internal State Variables */
 extern int microcodeState;
